@@ -1,0 +1,24 @@
+Projects => {
+    Name: Blossom
+    Type: Cafe
+    System: Customized
+    SkillsN: Web Site, Desgining Package
+    Nature: Offline Cafe.
+    Team:[Boolean => {
+        true ? TeamMembersInfo: [{
+            UID:
+            FirstName + SurName :
+            ProjectRole:
+            Team Leader: {
+                UID, Names
+            }
+        }] // to every member
+        : Worker (the one working on the project): {
+            UID, Names
+        } 
+    }]
+    ClientUID: ""
+    ClientName: ""
+    ClientAccountRoles: ""
+    ClientSpecialRoles: [Boolean]
+}
