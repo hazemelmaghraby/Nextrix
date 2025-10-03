@@ -146,6 +146,9 @@ const IndividualSignIn = () => {
                 phone,
                 role,
                 owner,
+                certified: false,
+                premium: false,
+                configDone: false,
                 createdAt: serverTimestamp(),
                 ...(subRolesToSave && { subRoles: subRolesToSave })
             });

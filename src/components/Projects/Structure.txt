@@ -21,4 +21,5 @@ Projects => {
     ClientName: ""
     ClientAccountRoles: ""
     ClientSpecialRoles: [Boolean]
+    DisscountRate: 
 }

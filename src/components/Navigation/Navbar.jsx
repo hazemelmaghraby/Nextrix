@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import useUserData from '../../constants/data/useUserData';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../constants/firebase';
-import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck } from 'lucide-react';
 import { gsap } from 'gsap';
 import NotificationsPanel from './NotificationsPanel';
 import { getDoc, addDoc, getDocs, where, query, setDoc, collection, doc, serverTimestamp, orderBy, onSnapshot } from 'firebase/firestore';
+import Logo from '/Logo.png';
 
 
 const Navbar = () => {
-    const { firstName, surName, username, role, gender, phone, owner, premium, uid } = useUserData();
+    const { firstName, surName, username, role, gender, phone, owner, premium, uid, avatar } = useUserData();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [open, setOpen] = useState(false);
@@ -134,9 +135,12 @@ const Navbar = () => {
                 <nav className="container mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="header-item">
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent hover:cursor-pointer" onClick={() => window.location.href = '/'}>
-                                Nextrix
-                            </h1>
+                            <div className="flex items-center space-x-2">
+                                <img src={Logo} alt="" className='text-2xl w-10 text-red-600 mt-1' />
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent hover:cursor-pointer" onClick={() => window.location.href = '/'}>
+                                    Nextrix
+                                </h1>
+                            </div>
                         </div>
 
                         <div className="hidden md:flex space-x-8">
@@ -185,7 +189,7 @@ const Navbar = () => {
                                             }
                                         >
                                             <img
-                                                src="https://i.pravatar.cc/40" // replace with user profile pic
+                                                src={avatar || "https://i.pravatar.cc/40"} // replace with user profile pic
                                                 alt="profile"
                                                 className="w-8 h-8 rounded-full border border-orange-500/50"
                                             />
@@ -290,7 +294,7 @@ const Navbar = () => {
                                                         <div className="px-4 py-5 border-b border-yellow-400/40 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-blue-500/20 relative">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src="https://i.pravatar.cc/32"
+                                                                    src={avatar || "https://i.pravatar.cc/40"}
                                                                     alt="profile"
                                                                     className="w-8 h-8 rounded-full border-2 border-yellow-400 shadow-lg shadow-yellow-400/30"
                                                                 />
@@ -324,7 +328,7 @@ const Navbar = () => {
                                                         <div className="px-4 py-3 border-b border-red-400/30 bg-gradient-to-r from-red-500/10 to-red-400/10">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src="https://i.pravatar.cc/32"
+                                                                    src={avatar || "https://i.pravatar.cc/32"}
                                                                     alt="profile"
                                                                     className="w-8 h-8 rounded-full border-2 border-red-500/70"
                                                                 />
@@ -363,7 +367,7 @@ const Navbar = () => {
                                                         <div className="px-4 py-3 border-b border-purple-400/30 bg-gradient-to-r from-purple-500/10 to-blue-400/10">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src="https://i.pravatar.cc/32"
+                                                                    src={avatar || "https://i.pravatar.cc/32"}
                                                                     alt="profile"
                                                                     className="w-8 h-8 rounded-full border-2 border-purple-500/70"
                                                                 />
@@ -402,7 +406,7 @@ const Navbar = () => {
                                                         <div className="px-4 py-3 border-b border-green-400/30 bg-gradient-to-r from-green-500/10 to-blue-400/10">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src="https://i.pravatar.cc/32"
+                                                                    src={avatar || "https://i.pravatar.cc/32"}
                                                                     alt="profile"
                                                                     className="w-8 h-8 rounded-full border-2 border-green-500/70"
                                                                 />
@@ -434,7 +438,7 @@ const Navbar = () => {
                                                         <div className="px-4 py-3 border-b border-white/10 bg-gradient-to-r from-orange-500/10 to-blue-500/10">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src="https://i.pravatar.cc/32"
+                                                                    src={avatar || "https://i.pravatar.cc/32"}
                                                                     alt="profile"
                                                                     className="w-8 h-8 rounded-full border-2 border-orange-500/50"
                                                                 />
@@ -478,7 +482,7 @@ const Navbar = () => {
                                                     </a>
 
                                                     <a
-                                                        href="/prjectCreationForm"
+                                                        href="/addProject"
                                                         className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-emerald-400 transition-all duration-200 group"
                                                     >
                                                         <Projector className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
@@ -486,11 +490,20 @@ const Navbar = () => {
                                                     </a>
 
                                                     <a
-                                                        href="/prjectCreationForm"
+                                                        href="/userPortfolio"
                                                         className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-lime-400 transition-all duration-200 group"
                                                     >
                                                         <BriefcaseBusiness className="w-4 h-4 text-lime-400 group-hover:text-lime-300 transition-colors" />
                                                         <span className="text-sm font-medium">Portfolio</span>
+                                                    </a>
+
+
+                                                    <a
+                                                        href="/verification"
+                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-cyan-400 transition-all duration-200 group"
+                                                    >
+                                                        <BadgeCheck className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                                                        <span className="text-sm font-medium">Become Certified</span>
                                                     </a>
 
                                                     <div className="border-t border-white/10 my-1"></div>

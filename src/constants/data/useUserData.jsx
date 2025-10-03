@@ -18,6 +18,7 @@ export default function useUserData() {
     const [careerRoles, setCareerRoles] = useState(null);
     const [subRoles, setSubRoles] = useState(["No Stored Roles"]);
     const [premium, setPremium] = useState(false);
+    const [avatar, setAvatar] = useState(null);
 
     // NEW: loading state
     const [loading, setLoading] = useState(true);
@@ -46,6 +47,7 @@ export default function useUserData() {
                         setPremium(userData.premium || false);
                         setCareerRoles(userData.careerRoles || "Unchoosed");
                         setSubRoles(userData.subRoles || ["Unchoosed"]);
+                        setAvatar(userData.avatarURL || null);
                     }
                 } catch (error) {
                     console.error(`Error fetching user data: ${error}`);
@@ -90,5 +92,6 @@ export default function useUserData() {
         subRoles,
         loading,
         uid, // <--- use this in your components
+        avatar,
     };
 }

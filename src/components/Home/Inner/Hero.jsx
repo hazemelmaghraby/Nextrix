@@ -111,7 +111,12 @@ const Hero = () => {
                     </button>
                     {owner && (
                         <>
-                            <button className="border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white hover:cursor-pointer px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+                            <button
+                                onClick={() => {
+                                    window.location.href = '/Dashboard1';
+                                }}
+                                className="border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white hover:cursor-pointer px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+                            >
                                 Ownership Dashboard
                             </button>
                         </>

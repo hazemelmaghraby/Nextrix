@@ -100,7 +100,8 @@ const Profile = () => {
         careerRoles,
         age,
         user,
-        loading
+        loading,
+        avatar,
     } = useUserData();
 
 
@@ -181,7 +182,7 @@ const Profile = () => {
                                 className={`relative w-28 h-28 rounded-full overflow-hidden border-4 ${profileBorderClass}`}
                             >
                                 <img
-                                    src={`https://ui-avatars.com/api/?name=${firstName}+${surName}&background=000000&color=ffffff`}
+                                    src={avatar || `https://ui-avatars.com/api/?name=${firstName}+${surName}&background=000000&color=ffffff`}
                                     alt="Profile"
                                     className="w-full h-full object-cover"
                                 />

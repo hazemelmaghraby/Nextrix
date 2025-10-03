@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 
 
-const missingPermissions = ({ children }) => {
+const MissingPermissions = ({ children }) => {
     const titleRef = useRef();
     const subtitleRef = useRef();
 
@@ -60,4 +60,4 @@ const missingPermissions = ({ children }) => {
     )
 }
 
-export default missingPermissions;
+export default MissingPermissions;

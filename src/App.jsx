@@ -15,6 +15,12 @@ import NotFound from './constants/components/NotFound';
 import UnderDevelopment from './constants/components/UnderDevelopment';
 import MoreInfoForm from './components/Registeration/moreInfo';
 import Announcements from './components/Ownership/Announcements';
+import PricingSection from './components/Pricing/Pricing';
+import AdminDashboard from './components/Ownership/OwnershipDashboard/ODashboard';
+import AccountsPanel from './components/Ownership/OwnershipDashboard/AccountsPanel/AccountsPanel';
+import Verification from './components/Verification/Verification';
+import CreateProject from './components/CreateProject/CreateProject';
+import Portfolio from './components/Portfolio/Portfolio';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -63,6 +69,12 @@ function App() {
         <Route path='*' element={<NotFound />} />
         <Route path='/subInfo' element={<MoreInfoForm />} />
         <Route path='/announcementsCenter' element={<Announcements />} />
+        <Route path='/pricing' element={<PricingSection />} />
+        <Route path='/Dashboard1' element={<AdminDashboard />} />
+        <Route path='/accountsPanel' element={<AccountsPanel />} />
+        <Route path='/verification' element={<Verification />} />
+        <Route path='/addProject' element={<CreateProject />} />
+        <Route path='/userPortfolio' element={<Portfolio />} />
       </Route>
     </Route>
   ))
