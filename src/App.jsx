@@ -21,6 +21,8 @@ import AccountsPanel from './components/Ownership/OwnershipDashboard/AccountsPan
 import Verification from './components/Verification/Verification';
 import CreateProject from './components/CreateProject/CreateProject';
 import Portfolio from './components/Portfolio/Portfolio';
+import AccountSettings from './components/Settings/AccountSettings';
+// import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,6 +77,8 @@ function App() {
         <Route path='/verification' element={<Verification />} />
         <Route path='/addProject' element={<CreateProject />} />
         <Route path='/userPortfolio' element={<Portfolio />} />
+        <Route path='/accountSettings' element={<AccountSettings />} />
+        {/* <Route path='/demo' element={<AccountSettingsDemo />} /> */}
       </Route>
     </Route>
   ))

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../constants/firebase";
 import useUserData from "../../constants/data/useUserData";
 import NotSignedIn from '../../constants/components/NotSignedIn';
 import Loading from "../../constants/components/Loading";
-import { Github, Linkedin, Instagram, Phone } from "lucide-react";
+import { Github, Linkedin, Instagram, Phone, Check } from "lucide-react";
+import { gsap } from "gsap";
+import { useNavigate } from "react-router-dom";
 
 export default function MoreInfoForm() {
     const [role, setRole] = useState("");
@@ -20,11 +22,72 @@ export default function MoreInfoForm() {
     const [github, setGithub] = useState("");
     const [linkedin, setLinkedin] = useState("");
     const [instagram, setInstagram] = useState("");
-    const [phone, setPhone] = useState("");
-    const { user, uid, loading } = useUserData();
+    const [whatsApp, setWhatsApp] = useState("");
+    const { user, uid, loading, configDonee } = useUserData();
+
+    const titleRef = useRef();
+    const subtitleRef = useRef();
+
+    useEffect(() => {
+        gsap.fromTo(
+            titleRef.current,
+            { y: 40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
+        );
+
+        gsap.fromTo(
+            subtitleRef.current,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1, delay: 0.3, ease: "power2.out" }
+        );
+    }, []);
+
+    const navigate = useNavigate();
 
     if (loading) {
         <Loading />
+    }
+
+    if (configDonee && !loading) {
+
+
+        return (
+            <>
+                <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+                    {/* Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-black via-green-500/10 to-black" />
+
+                    {/* Glow effects */}
+                    <div className="absolute top-20 left-20 w-72 h-72 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
+
+                    {/* Content */}
+                    <div className="relative z-10 text-center px-6 max-w-3xl">
+                        <div className="inline-flex items-center justify-center p-6 rounded-full border border-green-500/30 bg-black/40 backdrop-blur-lg shadow-lg mb-6">
+                            <Check className="w-12 h-12 text-green-500" />
+                        </div>
+                        <h1
+                            ref={titleRef}
+                            className="text-5xl py-3.5 md:text-7xl font-bold bg-gradient-to-r from-green-500 via-orange-500 to-white bg-clip-text text-transparent mb-4"
+                        >
+                            Profile Info is complete
+                        </h1>
+                        <p
+                            ref={subtitleRef}
+                            className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8"
+                        >
+                            Your profile information is complete. You can now proceed to start using all the features of our platform. If you wish to update your profile details in the future, you can do so from your account settings.
+                        </p>
+                        <button
+                            onClick={() => navigate("/")}
+                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
+                        >
+                            Home
+                        </button>
+                    </div>
+                </section>
+            </>
+        )
     }
 
 
@@ -40,8 +103,14 @@ export default function MoreInfoForm() {
         e.preventDefault();
         const user = auth.currentUser;
         if (!user) {
-            alert("No logged-in user!");
-            return;
+
+            return (
+                <>
+                    <NotSignedIn>
+                        you must be signed in to complete setting up your profile.
+                    </NotSignedIn>
+                </>
+            )
         }
 
         // ✅ validations
@@ -77,7 +146,7 @@ export default function MoreInfoForm() {
                         github,
                         linkedin,
                         instagram,
-                        phone,
+                        whatsApp,
                         configDone: true,
                     },
                 },
@@ -106,7 +175,7 @@ export default function MoreInfoForm() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-6 mt-15">
             <form
                 onSubmit={handleSubmit}
-                className="w-full max-w-4xl bg-black/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/10 p-8 space-y-6"
+                className="w-full bg-black/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/10 p-8 space-y-6"
             >
                 <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-orange-400 to-blue-400 bg-clip-text text-transparent">
                     Complete Your Profile
@@ -134,12 +203,12 @@ export default function MoreInfoForm() {
                             onChange={(e) => setLevel(e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            <option value="">Select level</option>
-                            <option>Intern</option>
-                            <option>Junior</option>
-                            <option>Mid</option>
-                            <option>Senior</option>
-                            <option>Lead</option>
+                            <option value="" className="bg-black text-gray-400">Select level</option>
+                            <option className="bg-black text-white">Intern</option>
+                            <option className="bg-black text-white">Junior</option>
+                            <option className="bg-black text-white">Mid</option>
+                            <option className="bg-black text-white">Senior</option>
+                            <option className="bg-black text-white">Lead</option>
                         </select>
                     </div>
                 </div>
@@ -155,21 +224,341 @@ export default function MoreInfoForm() {
                     />
                 </div>
 
-                {/* Grid for Skills + Projects */}
+
+                {/* Grid for Career + Sub Roles */}
                 <div className="grid md:grid-cols-2 gap-6">
-                    {/* Skills */}
+                    {/* Career Roles Dropdown */}
                     <div>
-                        <label className="block text-gray-300 mb-2">Skills</label>
-                        <input
-                            type="text"
-                            value={skills}
-                            onChange={(e) => setSkills(e.target.value)}
-                            className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g. React, Node.js, Figma (comma separated)"
-                        />
+                        <label className="block text-gray-300 mb-2">Career Roles</label>
+                        <div className="relative">
+                            <select
+                                value={careerRoles.length > 0 ? careerRoles[0] : ""}
+                                onChange={e => setCareerRoles([e.target.value])}
+                                className="w-full px-4 py-2 pr-10 rounded-lg bg-gradient-to-r from-black/60 to-blue-900/40 border border-blue-400/30 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition duration-150 ease-in-out shadow-md"
+                                style={{
+                                    backgroundImage:
+                                        "linear-gradient(135deg, rgba(30,41,59,0.7) 0%, rgba(59,130,246,0.15) 100%)"
+                                }}
+                            >
+                                <option value="" className="bg-black text-gray-400">Select a career role</option>
+                                <option className="bg-black text-white">Developer</option>
+                                <option className="bg-black text-white">Designer</option>
+                                <option className="bg-black text-white">Manager</option>
+                                <option className="bg-black text-white">Tester</option>
+                                <option className="bg-black text-white">Accountant</option>
+                                <option className="bg-black text-white">Virtual Assistant</option>
+                            </select>
+                            {/* Custom dropdown arrow */}
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Projects */}
+                    <div>
+                        <label className="block text-gray-300 mb-2">Sub Roles</label>
+                        <select
+                            value={subRoles.length > 0 ? subRoles[0] : ""}
+                            onChange={e => setSubRoles([e.target.value])}
+                            className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="" className="bg-black text-gray-400">Select a sub role</option>
+                            {(() => {
+                                // Map career role to sub roles
+                                const subRoleOptions = {
+                                    Developer: [
+                                        "Frontend",
+                                        "Backend",
+                                        "Mobile App",
+                                        "Desktop App",
+                                        "Full Stack",
+                                        "DevOps",
+                                        "Game Developer",
+                                        "Embedded Systems",
+                                        "Data Engineer",
+                                        "AI/ML Engineer"
+                                    ],
+                                    Designer: [
+                                        "UI Designer",
+                                        "UX Designer",
+                                        "Graphic Designer",
+                                        "Product Designer",
+                                        "Motion Designer",
+                                        "Brand Designer"
+                                    ],
+                                    Manager: [
+                                        "Project Manager",
+                                        "Product Manager",
+                                        "Scrum Master",
+                                        "Team Lead",
+                                        "Operations Manager"
+                                    ],
+                                    Tester: [
+                                        "QA Engineer",
+                                        "Automation Tester",
+                                        "Manual Tester",
+                                        "Performance Tester",
+                                        "Security Tester"
+                                    ],
+                                    Accountant: [
+                                        "Financial Accountant",
+                                        "Management Accountant",
+                                        "Auditor",
+                                        "Payroll Specialist"
+                                    ],
+                                    "Virtual Assistant": [
+                                        "Administrative Support",
+                                        "Customer Service",
+                                        "Data Entry",
+                                        "Social Media Assistant"
+                                    ]
+                                };
+                                const selectedCareer = careerRoles.length > 0 ? careerRoles[0] : "";
+                                const options = subRoleOptions[selectedCareer] || [];
+                                return options.length > 0
+                                    ? options.map(opt => (
+                                        <option className="bg-black text-white" key={opt} value={opt}>{opt}</option>
+                                    ))
+                                    : <option className="bg-black text-gray-400" disabled>No sub roles available. Please select a career role.</option>;
+                            })()}
+                        </select>
+                    </div>
+                    {/* Skills Dropdown */}
+                    <div className="mb-4">
+                        <label className="block text-gray-300 mb-2">Skills</label>
+                        <select
+                            className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={skills}
+                            onChange={(e) => setSkills(e.target.value)}
+                        >
+                            <option value="">Select a skill</option>
+                            {(() => {
+                                // Map subRole to skills
+                                const skillsOptions = {
+                                    // Developer subroles
+                                    "Frontend": [
+                                        "React",
+                                        "Vue",
+                                        "Angular",
+                                        "Svelte",
+                                        "Next.js",
+                                        "Nuxt.js",
+                                        "Pure JavaScript",
+                                        "TypeScript",
+                                        "HTML/CSS"
+                                    ],
+                                    "Backend": [
+                                        "Node.js",
+                                        "Express",
+                                        "Django",
+                                        "Flask",
+                                        "Spring Boot",
+                                        "Ruby on Rails",
+                                        "Go",
+                                        "PHP",
+                                        "Laravel"
+                                    ],
+                                    "Full Stack": [
+                                        "React",
+                                        "Node.js",
+                                        "Django",
+                                        "MongoDB",
+                                        "Express",
+                                        "Vue",
+                                        "Angular",
+                                        "GraphQL"
+                                    ],
+                                    "Mobile Developer": [
+                                        "React Native",
+                                        "Flutter",
+                                        "Swift",
+                                        "Kotlin",
+                                        "Java (Android)",
+                                        "Objective-C"
+                                    ],
+                                    "Game Developer": [
+                                        "Unity",
+                                        "Unreal Engine",
+                                        "Godot",
+                                        "C#",
+                                        "C++"
+                                    ],
+                                    "Embedded Systems": [
+                                        "C",
+                                        "C++",
+                                        "Microcontrollers",
+                                        "RTOS",
+                                        "Assembly"
+                                    ],
+                                    "Data Engineer": [
+                                        "Python",
+                                        "SQL",
+                                        "Spark",
+                                        "Hadoop",
+                                        "ETL",
+                                        "Airflow"
+                                    ],
+                                    "AI/ML Engineer": [
+                                        "Python",
+                                        "TensorFlow",
+                                        "PyTorch",
+                                        "scikit-learn",
+                                        "Keras",
+                                        "Pandas"
+                                    ],
+                                    // Designer subroles
+                                    "UI Designer": [
+                                        "Figma",
+                                        "Sketch",
+                                        "Adobe XD",
+                                        "InVision"
+                                    ],
+                                    "UX Designer": [
+                                        "User Research",
+                                        "Wireframing",
+                                        "Prototyping",
+                                        "Usability Testing"
+                                    ],
+                                    "Graphic Designer": [
+                                        "Adobe Photoshop",
+                                        "Adobe Illustrator",
+                                        "CorelDRAW",
+                                        "Canva"
+                                    ],
+                                    "Product Designer": [
+                                        "Figma",
+                                        "User Flows",
+                                        "Prototyping",
+                                        "Design Systems"
+                                    ],
+                                    "Motion Designer": [
+                                        "After Effects",
+                                        "Blender",
+                                        "Cinema 4D",
+                                        "Adobe Animate"
+                                    ],
+                                    "Brand Designer": [
+                                        "Logo Design",
+                                        "Brand Guidelines",
+                                        "Typography",
+                                        "Color Theory"
+                                    ],
+                                    // Manager subroles
+                                    "Project Manager": [
+                                        "Agile",
+                                        "Scrum",
+                                        "Kanban",
+                                        "Jira",
+                                        "Trello"
+                                    ],
+                                    "Product Manager": [
+                                        "Roadmapping",
+                                        "Market Research",
+                                        "User Stories",
+                                        "A/B Testing"
+                                    ],
+                                    "Scrum Master": [
+                                        "Scrum",
+                                        "Facilitation",
+                                        "Retrospectives",
+                                        "Sprint Planning"
+                                    ],
+                                    "Team Lead": [
+                                        "Leadership",
+                                        "Mentoring",
+                                        "Code Review",
+                                        "Conflict Resolution"
+                                    ],
+                                    "Operations Manager": [
+                                        "Process Optimization",
+                                        "Resource Planning",
+                                        "Budgeting"
+                                    ],
+                                    // Tester subroles
+                                    "QA Engineer": [
+                                        "Selenium",
+                                        "Cypress",
+                                        "Jest",
+                                        "Mocha",
+                                        "Manual Testing"
+                                    ],
+                                    "Automation Tester": [
+                                        "Selenium",
+                                        "Cypress",
+                                        "Appium",
+                                        "TestCafe"
+                                    ],
+                                    "Manual Tester": [
+                                        "Test Case Design",
+                                        "Bug Reporting",
+                                        "Exploratory Testing"
+                                    ],
+                                    "Performance Tester": [
+                                        "JMeter",
+                                        "LoadRunner",
+                                        "Gatling"
+                                    ],
+                                    "Security Tester": [
+                                        "OWASP",
+                                        "Burp Suite",
+                                        "Penetration Testing"
+                                    ],
+                                    // Accountant subroles
+                                    "Financial Accountant": [
+                                        "Financial Reporting",
+                                        "GAAP",
+                                        "Excel",
+                                        "QuickBooks"
+                                    ],
+                                    "Management Accountant": [
+                                        "Budgeting",
+                                        "Forecasting",
+                                        "Variance Analysis"
+                                    ],
+                                    "Auditor": [
+                                        "Internal Audit",
+                                        "Risk Assessment",
+                                        "Compliance"
+                                    ],
+                                    "Payroll Specialist": [
+                                        "Payroll Processing",
+                                        "Tax Compliance",
+                                        "HRIS"
+                                    ],
+                                    // Virtual Assistant subroles
+                                    "Administrative Support": [
+                                        "Scheduling",
+                                        "Data Entry",
+                                        "Document Management"
+                                    ],
+                                    "Customer Service": [
+                                        "CRM",
+                                        "Live Chat",
+                                        "Email Support"
+                                    ],
+                                    "Data Entry": [
+                                        "Excel",
+                                        "Google Sheets",
+                                        "Database Management"
+                                    ],
+                                    "Social Media Assistant": [
+                                        "Content Scheduling",
+                                        "Analytics",
+                                        "Community Management"
+                                    ]
+                                };
+                                const options = skillsOptions[subRoles[0]] || [];
+                                return options.length > 0
+                                    ? options.map(skill => (
+                                        <option className="bg-black text-white" key={skill} value={skill}>{skill}</option>
+                                    ))
+                                    : <option className="bg-black text-gray-400" disabled>No skills available. Please select a sub role.</option>;
+                            })()}
+                        </select>
+                    </div>
+
                     <div>
                         <label className="block text-gray-300 mb-2">Previous Projects</label>
                         <input
@@ -182,42 +571,8 @@ export default function MoreInfoForm() {
                     </div>
                 </div>
 
-                {/* Grid for Career + Sub Roles */}
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-gray-300 mb-2">Career Roles</label>
-                        <select
-                            multiple
-                            value={careerRoles}
-                            onChange={handleCareerChange}
-                            className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                        >
-                            <option>Front End</option>
-                            <option>Back End</option>
-                            <option>Ui, Ux</option>
-                            <option>Designer</option>
-                            <option>Accountant</option>
-                            <option>Project Manager</option>
-                        </select>
-                        <p className="text-xs text-gray-500 mt-1">Hold Ctrl / Cmd to select multiple</p>
-                    </div>
-
-                    <div>
-                        <label className="block text-gray-300 mb-2">Sub Roles</label>
-                        <select
-                            multiple
-                            value={subRoles}
-                            onChange={handleSubRolesChange}
-                            className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                        >
-                            <option>Marketing</option>
-                            <option>Team Lead</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div>
-                    <label className="block text-gray-300 mb-2">Social Media Links</label>
+                    <label className="block text-gray-300 mb-2">Social Links</label>
                     <div className="space-y-3">
                         <div className="flex items-center space-x-3">
                             <span className="text-gray-400">
@@ -261,8 +616,8 @@ export default function MoreInfoForm() {
                             </span>
                             <input
                                 type="url"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                value={whatsApp}
+                                onChange={(e) => setWhatsApp(e.target.value)}
                                 className="flex-1 px-4 py-2 rounded-lg bg-black/40 border border-white/20 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="WhatsApp Link or Number"
                             />

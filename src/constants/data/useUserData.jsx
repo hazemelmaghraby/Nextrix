@@ -19,7 +19,15 @@ export default function useUserData() {
     const [subRoles, setSubRoles] = useState(["No Stored Roles"]);
     const [premium, setPremium] = useState(false);
     const [avatar, setAvatar] = useState(null);
-
+    const [bio, setBio] = useState(null)
+    const [github, setGithub] = useState(null);
+    const [linkedin, setLinkedin] = useState(null);
+    const [instagram, setInstagram] = useState(null);
+    const [whatsApp, setWhatsApp] = useState(null);
+    const [title, setTitle] = useState(null);
+    const [certified, setCertified] = useState(false);
+    const [configDonee, setConfigDonee] = useState(false);
+    const [userLevel, setUserLevel] = useState("");
     // NEW: loading state
     const [loading, setLoading] = useState(true);
 
@@ -45,9 +53,19 @@ export default function useUserData() {
                         setPhone(userData.phone || "#");
                         setOwner(userData.owner || false);
                         setPremium(userData.premium || false);
-                        setCareerRoles(userData.careerRoles || "Unchoosed");
-                        setSubRoles(userData.subRoles || ["Unchoosed"]);
+                        setCareerRoles(userData.profileInfo.careerRoles || "Unchoosed");
+                        setSubRoles(userData.profileInfo.subRoles || ["Unchoosed"]);
                         setAvatar(userData.avatarURL || null);
+                        setInstagram(userData.profileInfo.instagram || null);
+                        setWhatsApp(userData.profileInfo.whatsApp || null);
+                        setGithub(userData.profileInfo.github || null);
+                        setLinkedin(userData.profileInfo.linkedin || null);
+                        setBio(userData.profileInfo.bio || null)
+                        setTitle(userData.profileInfo.title || null)
+                        setCertified(userData.certified || false);
+                        setConfigDonee(userData.profileInfo.configDone || false)
+                        setUserLevel(userData.profileInfo.level || "Not Set")
+
                     }
                 } catch (error) {
                     console.error(`Error fetching user data: ${error}`);
@@ -68,6 +86,11 @@ export default function useUserData() {
                 setPremium(false);
                 setCareerRoles(null);
                 setSubRoles(["No Stored Roles"]);
+                setInstagram(null);
+                setWhatsApp(null);
+                setGithub(null);
+                setLinkedin(null);
+                setCertified(false)
             }
 
             setLoading(false); // finished fetching
@@ -93,5 +116,14 @@ export default function useUserData() {
         loading,
         uid, // <--- use this in your components
         avatar,
+        github,
+        linkedin,
+        instagram,
+        whatsApp,
+        bio,
+        title,
+        certified,
+        configDonee,
+        userLevel,
     };
 }

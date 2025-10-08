@@ -474,7 +474,7 @@ const Navbar = () => {
                                                     </a>
 
                                                     <a
-                                                        href="/settings"
+                                                        href="/accountSettings"
                                                         className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-blue-400 transition-all duration-200 group"
                                                     >
                                                         <Settings className="w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors" />

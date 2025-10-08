@@ -8,10 +8,10 @@ import {
     Crown,
     UserStar,
     Linkedin,
-    Twitter,
-    Facebook,
     LinkedinIcon,
     Instagram,
+    Github,
+    BadgeCheck,
 } from "lucide-react";
 import useUserData from "../../constants/data/useUserData";
 import Loading from "../../constants/components/Loading";
@@ -63,6 +63,15 @@ const roleStyles = {
         username: "text-orange-200",
         roleBg: "bg-gradient-to-r from-orange-400/30 to-orange-500/30 border border-orange-400/50",
     },
+    certified: {
+        // Cyan border and shadow, cyan badge, cyan text
+        frame: "border-2 border-cyan-400 shadow-[0_0_0_3px_rgba(34,211,238,0.3)]",
+        // badge: "bg-cyan-400/20 border border-cyan-400 text-cyan-200 uppercase tracking-wider animate-pulse",
+        border: "border-cyan-400 shadow-[0_0_0_3px_rgba(34,211,238,0.3)]",
+        name: "text-cyan-300",
+        username: "text-cyan-200",
+        roleBg: "bg-gradient-to-r from-cyan-400/30 to-cyan-500/30 border border-cyan-400/50",
+    },
     default: {
         frame: "border-2 border-white/10",
         badge: "bg-gray-500/20 border border-gray-500/30 text-gray-300",
@@ -73,7 +82,13 @@ const roleStyles = {
     },
 };
 
-function getRoleKey({ owner, role, premium }) {
+/*
+
+*/
+
+function getRoleKey({ owner, role, premium, certified }) {
+    // Certified takes precedence for styling
+    if (certified && !owner && role === "admin" && role === "moderator" && role === "staff") return "certified";
     if (owner) return "owner";
     if (role && typeof role === "string") {
         const r = role.toLowerCase();
@@ -102,6 +117,13 @@ const Profile = () => {
         user,
         loading,
         avatar,
+        github,
+        linkedin,
+        instagram,
+        whatsApp,
+        bio,
+        title,
+        certified,
     } = useUserData();
 
 
@@ -135,7 +157,7 @@ const Profile = () => {
     }
 
     // Determine style based on role/owner/premium
-    const roleKey = getRoleKey({ owner, role, premium });
+    const roleKey = getRoleKey({ owner, role, premium, certified });
     const frameClass = roleStyles[roleKey]?.frame || roleStyles.default.frame;
     const badgeClass = roleStyles[roleKey]?.badge || roleStyles.default.badge;
     const profileBorderClass = roleStyles[roleKey]?.border || roleStyles.default.border;
@@ -146,7 +168,10 @@ const Profile = () => {
     // Role label and icon
     let roleLabel = role;
     let roleIcon = null;
-    if (owner) {
+    if (certified && !owner) {
+        roleLabel = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+        roleIcon = null;
+    } else if (owner) {
         roleLabel = "Owner";
         roleIcon = <Shield className="w-4 h-4" />;
     } else if (roleKey === "admin") {
@@ -163,20 +188,20 @@ const Profile = () => {
     }
 
     return (
-        <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
+        <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden my-2">
             {/* Animated BG Orbs */}
             <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
             <div className="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-orange-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
 
             {/* Outer border based on role */}
             <div
-                className={`relative w-full max-w-5xl mt-20 p-[2px] rounded-3xl ${frameClass}`}
+                className={`relative w-full mt-20 p-[2px] mx-5 rounded-3xl ${frameClass}`}
             >
                 {/* Glassmorphism inner card */}
                 <div className="bg-black/70 backdrop-blur-2xl rounded-3xl p-10 md:p-12 text-white space-y-8 shadow-[0_0_30px_rgba(0,0,0,0.3)]">
                     {/* Header with profile pic */}
                     <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-8 gap-6">
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-4">
                             {/* Profile Image */}
                             <div
                                 className={`relative w-28 h-28 rounded-full overflow-hidden border-4 ${profileBorderClass}`}
@@ -197,15 +222,26 @@ const Profile = () => {
                                             <Crown className="text-yellow-400 mt-2" />
                                         </>
                                     )}
-                                    {premium && (
+                                    {premium && !certified && (
                                         <>
                                             <UserStar className="text-yellow-400 mt-2" />
                                         </>
                                     )}
+                                    {certified && !owner && (
+                                        <>
+                                            <BadgeCheck className="text-cyan-400 mt-2" />
+                                        </>
+                                    )}
                                 </h1>
                                 <p className={`${usernameClass} ${usernameClass === "text-gray-400" ? "" : "font-semibold"}`}>@{username}</p>
+                                {title && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-lg font-semibold text-orange-400">{title}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
+
 
                         {/* Roles */}
                         <div className="flex flex-col items-end gap-2">
@@ -214,15 +250,30 @@ const Profile = () => {
                                 <span>{roleLabel}</span>
                             </span>
                             {/* Show premium badge if premium and not owner and not admin/mod/staff */}
-                            {premium && !owner && !["admin", "moderator", "staff"].includes(roleKey) && (
+                            {premium && !certified && !owner && !["admin", "moderator", "staff"].includes(roleKey) && (
                                 <span className="px-3 py-1 rounded-full text-xs bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center space-x-1 animate-pulse">
                                     <Crown className="w-4 h-4" />
                                     <span>Premium</span>
                                 </span>
                             )}
                             {/* Show role background badge for owner/admin/mod/staff */}
+                            {certified && !owner && !["admin", "moderator", "staff"].includes(roleKey) && (
+                                <span className="px-3 py-1 rounded-full text-xs bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center space-x-1 animate-pulse">
+                                    <BadgeCheck className="w-4 h-4" />
+                                    <span>Certified</span>
+                                </span>
+                            )}
                         </div>
                     </div>
+
+
+                    {/* Bio Section */}
+                    {bio && (
+                        <div className="max-w-md mt-4 md:mt-0">
+                            <h3 className="text-lg font-semibold text-white/80 mb-1">Bio</h3>
+                            <p className="text-gray-300 whitespace-pre-line">{bio}</p>
+                        </div>
+                    )}
 
                     {/* Contact Info */}
                     <div className="grid md:grid-cols-2 gap-6">
@@ -241,6 +292,12 @@ const Profile = () => {
                             </span>
                         </div>
                         <div className="flex items-center space-x-3">
+                            <BadgeCheck className="w-5 h-5 text-cyan-400" />
+                            <span className="text-gray-300">
+                                {certified ? "Certified Member" : "Standard Member"}
+                            </span>
+                        </div>
+                        <div className="flex items-center space-x-3">
                             <Star className="w-5 h-5 text-yellow-400" />
                             <span className="text-gray-300">
                                 {premium ? "Premium Member" : "Standard Member"}
@@ -249,16 +306,25 @@ const Profile = () => {
                     </div>
 
                     <div className="activityRoles">
-                        <h2 className="text-xl font-semibold mb-3 text-white/90">
+                        <h2 className="text-xl font-semibold mb-3 text-white/90 gap-2">
                             Activity Roles
                         </h2>
                         {premium && (<>
-                            <div className="inline-flex items-center px-6 py-1 rounded-full border-2 bg-gradient-to-r from-amber-500/30 to-amber-400/30 border-amber-400/50 shadow-lg">
+                            <div className="inline-flex items-center px-6 py-1 rounded-full border-2 bg-gradient-to-r mr-2 from-amber-500/30 to-amber-400/30 border-amber-400/50 shadow-lg">
                                 <span className="text-md font-bold capitalize text-amber-200 tracking-wide">
                                     premium
                                 </span>
                             </div>
                         </>)}
+                        {certified && (
+                            <>
+                                <div className="inline-flex items-center px-6 py-1 rounded-full border-2 bg-gradient-to-r from-cyan-500/30 to-cyan-400/30 border-cyan-400/50 shadow-lg mt-2">
+                                    <span className="text-md font-bold capitalize text-cyan-200 tracking-wide">
+                                        certified
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Career Roles */}
@@ -313,7 +379,7 @@ const Profile = () => {
                         </h2>
                         <div className="flex gap-4">
                             <a
-                                href="https://linkedin.com/in/yourusername"
+                                href={linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-3 rounded-full bg-white/5 border border-white/10 text-blue-400 hover:bg-blue-500/20 hover:scale-110 transition"
@@ -321,28 +387,28 @@ const Profile = () => {
                                 <Linkedin className="w-6 h-6" />
                             </a>
                             <a
-                                href="https://twitter.com/yourusername"
+                                href={github}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-3 rounded-full bg-white/5 border border-white/10 text-sky-400 hover:bg-sky-500/20 hover:scale-110 transition"
+                                className="p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-gray-500/20 hover:scale-110 transition"
                             >
-                                <Twitter className="w-6 h-6" />
+                                <Github className="w-6 h-6" />
                             </a>
                             <a
-                                href="https://facebook.com/yourusername"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-3 rounded-full bg-white/5 border border-white/10 text-blue-600 hover:bg-blue-600/20 hover:scale-110 transition"
-                            >
-                                <Facebook className="w-6 h-6" />
-                            </a>
-                            <a
-                                href="https://instagram.com/yourusername"
+                                href={instagram}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-3 rounded-full bg-white/5 border border-white/10 text-pink-400 hover:bg-pink-500/20 hover:scale-110 transition"
                             >
                                 <Instagram className="w-6 h-6" />
+                            </a>
+                            <a
+                                href={instagram}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-3 rounded-full bg-white/5 border border-white/10 text-green-400 hover:bg-green-500/20 hover:scale-110 transition"
+                            >
+                                <Phone className="w-6 h-6" />
                             </a>
                         </div>
                     </div>
