@@ -10,6 +10,9 @@ import missingPermissions from '../../constants/components/missingPermissions';
 
 
 const Announcements = () => {
+    React.useEffect(() => {
+        document.title = 'Announcements';
+    }, []);
 
     const [maintenance, setMaintenance] = useState(null);
     const { user, owner, role, uid } = useUserData();

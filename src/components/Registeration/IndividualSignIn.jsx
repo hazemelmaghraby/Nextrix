@@ -30,6 +30,9 @@ const IndividualSignIn = () => {
     const [vaultCondition, setVaultCondition] = useState("");
     const [QnsCondition, setQnsCondition] = useState("");
     const [DREZ_Condition, setDREZ_Condition] = useState("");
+    React.useEffect(() => {
+        document.title = 'Nextrix • Sign in';
+    }, []);
 
     useEffect(() => {
         gsap.fromTo(

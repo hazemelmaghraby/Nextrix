@@ -19,9 +19,10 @@ import PricingSection from './components/Pricing/Pricing';
 import AdminDashboard from './components/Ownership/OwnershipDashboard/ODashboard';
 import AccountsPanel from './components/Ownership/OwnershipDashboard/AccountsPanel/AccountsPanel';
 import Verification from './components/Verification/Verification';
-import CreateProject from './components/CreateProject/CreateProject';
+import CreateProject from './components/Projects/CreateProject/CreateProject';
 import Portfolio from './components/Portfolio/Portfolio';
 import AccountSettings from './components/Settings/AccountSettings';
+import AccountProjects from './components/Projects/AccountProjectsList/AccountProjectsList'
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -78,6 +79,7 @@ function App() {
         <Route path='/addProject' element={<CreateProject />} />
         <Route path='/userPortfolio' element={<Portfolio />} />
         <Route path='/accountSettings' element={<AccountSettings />} />
+        <Route path='/myProjects' element={<AccountProjects />} />
         {/* <Route path='/demo' element={<AccountSettingsDemo />} /> */}
       </Route>
     </Route>

@@ -7,6 +7,9 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import Loading from "../../constants/components/Loading";
 
 const SignUp = () => {
+    React.useEffect(() => {
+        document.title = 'Nextrix • Settings';
+    }, []);
     const formRef = useRef();
     const titleRef = useRef();
 

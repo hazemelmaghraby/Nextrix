@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 
 const AccountType = () => {
+    React.useEffect(() => {
+        document.title = 'Nextrix • Selection';
+    }, []);
     const [accountType, setAccountType] = useState("");
     const navigate = useNavigate();
 

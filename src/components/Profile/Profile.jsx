@@ -126,6 +126,10 @@ const Profile = () => {
         certified,
     } = useUserData();
 
+    React.useEffect(() => {
+        document.title = 'Nextrix • Profile';
+    }, []);
+
 
     // useEffect(() => {
     //     if (user !== undefined) {

@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import useUserData from '../../constants/data/useUserData';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../constants/firebase';
-import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus } from 'lucide-react';
 import { gsap } from 'gsap';
 import NotificationsPanel from './NotificationsPanel';
 import { getDoc, addDoc, getDocs, where, query, setDoc, collection, doc, serverTimestamp, orderBy, onSnapshot } from 'firebase/firestore';
 import Logo from '/Logo.png';
+import { motion } from "framer-motion";
 
 
 const Navbar = () => {
@@ -17,6 +18,7 @@ const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [projectsMenuIsOpen, setProjectsMenuIsOpen] = useState()
     const dropdownRef = useRef();
 
     useEffect(() => {
@@ -482,12 +484,38 @@ const Navbar = () => {
                                                     </a>
 
                                                     <a
-                                                        href="/addProject"
-                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-emerald-400 transition-all duration-200 group"
+                                                        href="#"
+                                                        onClick={e => {
+                                                            e.preventDefault();
+                                                            setProjectsMenuIsOpen(!projectsMenuIsOpen);
+                                                        }}
+                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-emerald-400 transition-all duration-200 group relative"
                                                     >
                                                         <Projector className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
-                                                        <span className="text-sm font-medium">Create Project</span>
+                                                        <span className="text-sm font-medium">Projects</span>
+                                                        <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${projectsMenuIsOpen ? "rotate-180" : ""}`} />
                                                     </a>
+                                                    {projectsMenuIsOpen && (
+                                                        <motion.div className="ml-8 mt-1 bg-black border border-white/10 rounded-lg shadow-lg z-50"
+                                                            initial={{ opacity: 0, y: 30 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            transition={{ duration: 0.4, ease: "easeOut" }}>
+                                                            <a
+                                                                href="/myProjects"
+                                                                className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-orange-400 transition-all duration-200 group rounded-t-lg"
+                                                            >
+                                                                <BriefcaseBusiness className="w-4 h-4 text-orange-400 group-hover:text-orange-300 transition-colors" />
+                                                                <span className="text-sm font-medium">My Projects</span>
+                                                            </a>
+                                                            <a
+                                                                href="/addProject"
+                                                                className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-emerald-400 transition-all duration-200 group rounded-b-lg"
+                                                            >
+                                                                <Plus className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
+                                                                <span className="text-sm font-medium">Create a Project</span>
+                                                            </a>
+                                                        </motion.div>
+                                                    )}
 
                                                     <a
                                                         href="/userPortfolio"

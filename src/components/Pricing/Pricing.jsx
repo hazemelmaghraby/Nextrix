@@ -21,8 +21,9 @@ const stagger = {
 };
 
 export default function PricingSection() {
-    document.title = "Pricing";
-
+    React.useEffect(() => {
+        document.title = 'Nextrix • Settings';
+    }, []);
     const plans = [
         {
             title: "Starter",

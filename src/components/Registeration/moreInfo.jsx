@@ -27,6 +27,9 @@ export default function MoreInfoForm() {
 
     const titleRef = useRef();
     const subtitleRef = useRef();
+    React.useEffect(() => {
+        document.title = 'Nextrix • subInfo';
+    }, []);
 
     useEffect(() => {
         gsap.fromTo(

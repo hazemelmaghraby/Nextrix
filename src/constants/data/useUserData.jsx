@@ -19,7 +19,7 @@ export default function useUserData() {
     const [subRoles, setSubRoles] = useState(["No Stored Roles"]);
     const [premium, setPremium] = useState(false);
     const [avatar, setAvatar] = useState(null);
-    const [bio, setBio] = useState(null)
+    const [bio, setBio] = useState(null);
     const [github, setGithub] = useState(null);
     const [linkedin, setLinkedin] = useState(null);
     const [instagram, setInstagram] = useState(null);
@@ -28,7 +28,8 @@ export default function useUserData() {
     const [certified, setCertified] = useState(false);
     const [configDonee, setConfigDonee] = useState(false);
     const [userLevel, setUserLevel] = useState("");
-    // NEW: loading state
+    const [projectsAssociatedd, setProjectsAssociatedd] = useState([]);
+    // loading state
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -65,6 +66,7 @@ export default function useUserData() {
                         setCertified(userData.certified || false);
                         setConfigDonee(userData.profileInfo.configDone || false)
                         setUserLevel(userData.profileInfo.level || "Not Set")
+                        setProjectsAssociatedd(userData.projectsAssociated || 'No Associated Projects.')
 
                     }
                 } catch (error) {
@@ -114,7 +116,7 @@ export default function useUserData() {
         careerRoles,
         subRoles,
         loading,
-        uid, // <--- use this in your components
+        uid,
         avatar,
         github,
         linkedin,
@@ -125,5 +127,6 @@ export default function useUserData() {
         certified,
         configDonee,
         userLevel,
+        projectsAssociatedd,
     };
 }

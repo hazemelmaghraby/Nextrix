@@ -11,6 +11,9 @@ const ODashboard = () => {
     const sectionRef = useRef(null);
     const featuresRef = useRef(null);
     const { owner, role, user, username, loading } = useUserData();
+    React.useEffect(() => {
+        document.title = 'Dashboard';
+    }, []);
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
 

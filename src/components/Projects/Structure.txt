@@ -4,6 +4,7 @@ Projects => {
     System: Customized
     SkillsN: Web Site, Desgining Package
     Nature: Offline Cafe.
+    levelRequired: ()
     Team:[Boolean => {
         true ? TeamMembersInfo: [{
             UID:

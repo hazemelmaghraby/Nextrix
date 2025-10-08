@@ -11,7 +11,9 @@ import Archive from "../../../../../public/archive.png";
 export default function AccountsPanel() {
     const [users, setUsers] = useState([]);
     const { user, username, owner, role, loading } = useUserData();
-
+    React.useEffect(() => {
+        document.title = 'Users Management';
+    }, []);
 
 
     useEffect(() => {

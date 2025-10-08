@@ -12,8 +12,9 @@ const Login = () => {
     const [messageType, setMessageType] = useState("success"); // "success" or "error"
     const navigate = useNavigate();
 
-    document.title = 'Login';
-
+    React.useEffect(() => {
+        document.title = 'Nextrix • Login';
+    }, []);
     const handleLogin = async (e) => {
         e.preventDefault();
         setMessage(null);
