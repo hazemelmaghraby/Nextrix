@@ -1,12 +1,13 @@
 import React from 'react';
 import ComingSoon from '../../constants/components/CommingSoon';
+import UnderDevelopment from '../../constants/components/UnderDevelopment';
 
 const CreateProject = () => {
     return (
         <div>
-            <ComingSoon />
+            <UnderDevelopment />
         </div>
     )
 }
 
-export default CreateProject
+export default CreateProject;

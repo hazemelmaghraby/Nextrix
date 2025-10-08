@@ -40,9 +40,9 @@ export default function AccountSettingsDemo() {
         );
 
     return (
-        <div className="min-h-screen flex items-center justify-center py-23">
+        <div className="min-h-screen flex items-center justify-center py-23 mb-1.5">
             <motion.div
-                className="flex flex-col md:flex-row w-screen h-screen bg-gradient-to-br from-black via-gray-900/90 to-black border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl"
+                className="flex flex-col md:flex-row w-screen bg-gradient-to-br from-black via-gray-900/90 to-black border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl"
                 initial="hidden"
                 animate="visible"
                 variants={fadeIn}
