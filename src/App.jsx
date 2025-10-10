@@ -27,6 +27,9 @@ import AdminDashboard from './components/Admins/Dashboard/AdminDashboard';
 import AdminProjectsManager from './components/ManagementsCommon/AllProjects/AllProjects';
 import Demo from './components/ManagementsCommon/AllProjects/ProjectsList';
 import ProjectsList from './components/ManagementsCommon/AllProjects/ProjectsList';
+import OurTeam from './components/OurTeam/OurTeam';
+import AccountsList from './components/PublicProfile/AccountsList';
+import AccountProfile from './components/PublicProfile/AccountProfile';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -86,7 +89,11 @@ function App() {
         <Route path='/myProjects' element={<AccountProjects />} />
         <Route path='/adminDashboard' element={<AdminDashboard />} />
         <Route path='/projectsRequests' element={<ProjectsList />} />
+        <Route path='/ourTeam' element={<OurTeam />} />
         <Route path='/demo' element={<Demo />} />
+        <Route path='/accs' element={<AccountsList />} />
+        <Route path='/accs/:uid' element={<AccountProfile />} />
+
       </Route>
     </Route>
   ))

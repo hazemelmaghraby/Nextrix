@@ -165,6 +165,7 @@ const ProjectsList = () => {
             try {
                 const rejectedProjectDoc = doc(db, 'stock', 'projects', 'rejected projects', selectedProject.id);
                 await deleteDoc(rejectedProjectDoc);
+                window.location.reload();
             } catch (err) {
                 console.log(`error :${err}`)
             }

@@ -547,7 +547,7 @@ const Navbar = () => {
                                                                 <Plus className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
                                                                 <span className="text-sm font-medium">Create a Project</span>
                                                             </a>
-                                                            {owner || role === 'admin' && (
+                                                            {role === 'admin' || owner && (
                                                                 <>
                                                                     <a
                                                                         href="/projectsRequests"
