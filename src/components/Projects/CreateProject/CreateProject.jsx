@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import useUserData from "../../../constants/data/useUserData";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, arrayUnion } from "firebase/firestore";
 import Loading from "../../../constants/components/Loading";
 import NotSignedIn from "../../../constants/components/NotSignedIn";
 import { db } from "../../../constants/firebase";
 import { motion } from "framer-motion";
+
 
 const CreateProject = () => {
     const { user, uid, firstName, surName, loading } = useUserData();
@@ -40,7 +41,7 @@ const CreateProject = () => {
         setSubmitMessage("");
         try {
             const projectId = crypto.randomUUID();
-            await setDoc(doc(db, "pending projects", projectId), {
+            await setDoc(doc(db, 'stock', "projects", "pending projects", projectId), {
                 name,
                 type,
                 system,
@@ -57,9 +58,14 @@ const CreateProject = () => {
                 createdAt: new Date().toISOString(),
                 status: "pending",
             });
-            await setDoc(doc(db, "users", uid), {
-                projectsAssociated: projectId
-            }, { merge: true })
+            // Instead of overwriting, append the new projectId to the existing array
+            await setDoc(
+                doc(db, "users", uid),
+                {
+                    projectsAssociated: arrayUnion(projectId)
+                },
+                { merge: true }
+            );
             setSubmitMessage("✅ Project created successfully!");
             setName("");
             setType("");

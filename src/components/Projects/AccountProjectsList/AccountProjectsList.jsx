@@ -9,9 +9,12 @@ import { motion } from "framer-motion";
 const AccountProjectsList = () => {
     const { user, uid, loading: userLoading } = useUserData();
 
-    const [projects, setProjects] = useState([]);
+    const [pendingProjects, setPendingProjects] = useState([]);
+    const [acceptedProjects, setAcceptedProjects] = useState([]);
+    const [rejectedProjects, setRejectedProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [filter, setFilter] = useState("All"); // "All" | "Pending" | "Accepted" | "Rejected"
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -24,7 +27,7 @@ const AccountProjectsList = () => {
             setError("");
 
             try {
-                // Get user doc
+                // Step 1: Get user document
                 const userDocRef = doc(db, "users", uid);
                 const userSnap = await getDoc(userDocRef);
 
@@ -33,28 +36,43 @@ const AccountProjectsList = () => {
                     setLoading(false);
                     return;
                 }
-                // new and diff 👇
+
                 const userData = userSnap.data();
                 const projectsAssociated = userData.projectsAssociated || [];
 
-                if (!Array.isArray(projectsAssociated) || projectsAssociated.length === 0) {
-                    setProjects([]);
+                if (projectsAssociated.length === 0) {
+                    setPendingProjects([]);
+                    setAcceptedProjects([]);
+                    setRejectedProjects([]);
                     setLoading(false);
                     return;
                 }
+                // ================================== // Advanced ======================================
+                // Helper to fetch from specific subcollection
+                const fetchFromSubcollection = async (subcollectionName) => {
+                    const projectPromises = projectsAssociated.map(async (projectId) => {
+                        const ref = doc(db, "stock", "projects", subcollectionName, projectId);
+                        const snap = await getDoc(ref);
+                        if (snap.exists()) {
+                            return { id: snap.id, ...snap.data() };
+                        }
+                        return null;
+                    });
+                    return (await Promise.all(projectPromises)).filter(Boolean);
+                };
 
-                // Fetch all associated projects
-                const projectPromises = projectsAssociated.map(async (projectId) => {
-                    const projectRef = doc(db, "pending projects", projectId);
-                    const projectSnap = await getDoc(projectRef);
-                    if (projectSnap.exists()) {
-                        return { id: projectSnap.id, ...projectSnap.data() };
-                    }
-                    return null;
-                });
+                // Step 2: Fetch from each subcollection
+                const [pending, accepted, rejected] = await Promise.all([
+                    fetchFromSubcollection("pending projects"),
+                    fetchFromSubcollection("accepted projects"),
+                    fetchFromSubcollection("rejected projects"),
+                ]);
 
-                const projectResults = (await Promise.all(projectPromises)).filter(Boolean);
-                setProjects(projectResults);
+                // Step 3: Set state
+                setPendingProjects(pending);
+                setAcceptedProjects(accepted);
+                setRejectedProjects(rejected);
+                // ======================================================================================== 
             } catch (err) {
                 console.error(err);
                 setError("Failed to fetch projects.");
@@ -69,6 +87,14 @@ const AccountProjectsList = () => {
     if (userLoading || loading) return <Loading />;
     if (!user) return <NotSignedIn />;
 
+    // 🧩 Combine based on filter
+    let displayedProjects = [];
+    if (filter === "All")
+        displayedProjects = [...pendingProjects, ...acceptedProjects, ...rejectedProjects];
+    else if (filter === "Pending") displayedProjects = pendingProjects;
+    else if (filter === "Accepted") displayedProjects = acceptedProjects;
+    else if (filter === "Rejected") displayedProjects = rejectedProjects;
+
     return (
         <motion.div
             className="min-h-[100vh] mt-20 bg-gradient-to-b from-black via-gray-950 to-black p-6 flex flex-col items-center"
@@ -81,13 +107,29 @@ const AccountProjectsList = () => {
 
             {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-            {projects.length === 0 ? (
+            {/* 🔽 Filter Buttons */}
+            <div className="mb-8 flex flex-wrap justify-center gap-3">
+                {["All", "Pending", "Accepted", "Rejected"].map((item) => (
+                    <button
+                        key={item}
+                        onClick={() => setFilter(item)}
+                        className={`px-5 py-2 rounded-xl text-sm font-semibold transition ${filter === item
+                            ? "bg-blue-600 text-white shadow-lg"
+                            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                            }`}
+                    >
+                        {item}
+                    </button>
+                ))}
+            </div>
+
+            {displayedProjects.length === 0 ? (
                 <p className="text-gray-400 text-center text-lg">
-                    You don’t have any associated projects yet.
+                    No {filter !== "All" ? filter.toLowerCase() : ""} projects found.
                 </p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl">
-                    {projects.map((project) => (
+                    {displayedProjects.map((project) => (
                         <motion.div
                             key={project.id}
                             className="bg-gray-900/70 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-6 text-white hover:border-blue-500/40 transition"
@@ -146,7 +188,9 @@ const AccountProjectsList = () => {
                                     <span className="font-semibold text-blue-400">
                                         Created At:
                                     </span>{" "}
-                                    {new Date(project.createdAt).toLocaleString()}
+                                    {project.createdAt
+                                        ? new Date(project.createdAt).toLocaleString()
+                                        : "N/A"}
                                 </p>
                             </div>
 

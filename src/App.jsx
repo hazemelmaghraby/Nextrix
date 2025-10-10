@@ -16,13 +16,16 @@ import UnderDevelopment from './constants/components/UnderDevelopment';
 import MoreInfoForm from './components/Registeration/moreInfo';
 import Announcements from './components/Ownership/Announcements';
 import PricingSection from './components/Pricing/Pricing';
-import AdminDashboard from './components/Ownership/OwnershipDashboard/ODashboard';
+import ODashboard from './components/Ownership/OwnershipDashboard/ODashboard';
 import AccountsPanel from './components/Ownership/OwnershipDashboard/AccountsPanel/AccountsPanel';
 import Verification from './components/Verification/Verification';
 import CreateProject from './components/Projects/CreateProject/CreateProject';
 import Portfolio from './components/Portfolio/Portfolio';
 import AccountSettings from './components/Settings/AccountSettings';
 import AccountProjects from './components/Projects/AccountProjectsList/AccountProjectsList'
+import AdminDashboard from './components/Admins/Dashboard/AdminDashboard';
+import AdminProjectsManager from './components/ManagementsCommon/AllProjects/AllProjects';
+import Demo from './components/ManagementsCommon/AllProjects/Demo';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -73,14 +76,16 @@ function App() {
         <Route path='/subInfo' element={<MoreInfoForm />} />
         <Route path='/announcementsCenter' element={<Announcements />} />
         <Route path='/pricing' element={<PricingSection />} />
-        <Route path='/Dashboard1' element={<AdminDashboard />} />
+        <Route path='/Dashboard1' element={<ODashboard />} />
         <Route path='/accountsPanel' element={<AccountsPanel />} />
         <Route path='/verification' element={<Verification />} />
         <Route path='/addProject' element={<CreateProject />} />
         <Route path='/userPortfolio' element={<Portfolio />} />
         <Route path='/accountSettings' element={<AccountSettings />} />
         <Route path='/myProjects' element={<AccountProjects />} />
-        {/* <Route path='/demo' element={<AccountSettingsDemo />} /> */}
+        <Route path='/adminDashboard' element={<AdminDashboard />} />
+        <Route path='/projectsRequests' element={<AdminProjectsManager />} />
+        <Route path='/demo' element={<Demo />} />
       </Route>
     </Route>
   ))

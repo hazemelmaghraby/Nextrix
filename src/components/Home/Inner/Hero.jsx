@@ -121,6 +121,30 @@ const Hero = () => {
                             </button>
                         </>
                     )}
+                    {role === 'admin' && !owner && (
+                        <>
+                            <button
+                                onClick={() => {
+                                    window.location.href = '/adminDashboard';
+                                }}
+                                className="border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:cursor-pointer px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+                            >
+                                Admin Dashboard
+                            </button>
+                        </>
+                    )}
+                    {role === 'moderator' && !owner && (
+                        <>
+                            <button
+                                onClick={() => {
+                                    window.location.href = '/management';
+                                }}
+                                className="border-2 border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white hover:cursor-pointer px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+                            >
+                                Mod Dashboard
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </section>

@@ -7,7 +7,7 @@ import NotSignedIn from '../../../constants/components/NotSignedIn';
 import MissingPermissions from '../../../constants/components/missingPermissions';
 import Loading from '../../../constants/components/Loading';
 
-const ODashboard = () => {
+const AdminDashboard = () => {
     const sectionRef = useRef(null);
     const featuresRef = useRef(null);
     const { owner, role, user, username, loading } = useUserData();
@@ -71,7 +71,7 @@ const ODashboard = () => {
     }
 
     // --- Require owner
-    if (!owner) {
+    if (role !== 'admin') {
         return (
             <MissingPermissions>
                 You do not have permission to access this page. Only owners/admins can enter the dashboard.
@@ -81,32 +81,11 @@ const ODashboard = () => {
 
     const adminMenu = [
         {
-            label: "Accounts Panel",
-            onClick: () => {
-                window.location.href = '/accountsPanel';
-            },
-            icon: <List />
-        },
-        {
             label: "Projects",
             onClick: () => {
                 window.location.href = '/projectsRequests';
             },
             icon: <FolderGit2 />
-        },
-        {
-            label: "Financials",
-            onClick: () => {
-                window.location.href = '/financials';
-            },
-            icon: < DollarSign />
-        },
-        {
-            label: "Admins Management",
-            onClick: () => {
-                window.location.href = '/adminsManagment';
-            },
-            icon: <ShieldUser />
         },
         {
             label: "Performance Analytics",
@@ -120,20 +99,6 @@ const ODashboard = () => {
                 window.location.href = '/cloud-integration';
             },
             icon: <Cloud />
-        },
-        {
-            label: "API Development",
-            onClick: () => {
-                window.location.href = '/api-development';
-            },
-            icon: <AtSign />
-        },
-        {
-            label: "Database Optimization",
-            onClick: () => {
-                window.location.href = '/database-optimization';
-            },
-            icon: <DatabaseZap />
         },
         {
             label: "User Experience Reviews",
@@ -153,7 +118,7 @@ const ODashboard = () => {
         return result;
     };
 
-    const adminMenuRows = chunkArray(adminMenu, 3);
+    const adminMenuRows = chunkArray(adminMenu, 4);
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray via-blue-950 to-black px-4">
@@ -208,4 +173,4 @@ const ODashboard = () => {
     );
 };
 
-export default ODashboard;
+export default AdminDashboard;
