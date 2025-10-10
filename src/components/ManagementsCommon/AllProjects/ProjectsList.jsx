@@ -9,7 +9,7 @@ import { XCircle } from "lucide-react";
 
 
 
-const Demo = () => {
+const ProjectsList = () => {
     const { user, uid, owner, role, loading, firstName, surName } = useUserData();
     const [pendingProjects, setPendingProjects] = useState([]);
     const [acceptedProjects, setAcceptedProjects] = useState([]);
@@ -17,6 +17,7 @@ const Demo = () => {
     const [selectedProject, setSelectedProject] = useState(null);
     const [acceptanceModalIsOpened, setAcceptanceModalIsOpened] = useState(false);
     const [rejectionModalIsOpened, setRejectionModalIsOpened] = useState(false);
+    const [projectDeletionModalIsOpen, setProjectDeletionModalIsOpen] = useState(false);
 
 
     // modal input states
@@ -152,12 +153,34 @@ const Demo = () => {
         }
     }
 
+    const handleProjectDeletion = (project) => {
+        setSelectedProject(project)
+        setProjectDeletionModalIsOpen(true);
+    }
+
+    const handleDeletionBtn = async (e) => {
+        e.preventDefault();
+        if (!selectedProject) return null;
+        if (owner) {
+            try {
+                const rejectedProjectDoc = doc(db, 'stock', 'projects', 'rejected projects', selectedProject.id);
+                await deleteDoc(rejectedProjectDoc);
+            } catch (err) {
+                console.log(`error :${err}`)
+            }
+        } else {
+            alert('you are not authorized for this action')
+            setProjectDeletionModalIsOpen(false);
+        }
+
+    }
+
     return (
         <div className="p-6 mt-30">
             <h2 className="text-2xl font-bold mb-4 text-blue-500">All Projects</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Pending Projects */}
-                <div className="bg-[#0a0a0f] rounded-2xl shadow-lg p-5 border border-[#1f1f2e] hover:border-blue-600 transition-all duration-300">
+                <div className="bg-[#0a0a0f] rounded-2xl shadow-lg p-5 border border-[#1f1f2e] transition-all duration-300">
                     <h3 className="text-xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
                         <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                         Pending Projects
@@ -170,15 +193,16 @@ const Demo = () => {
                             {pendingProjects.map((project) => (
                                 <li
                                     key={project.id}
-                                    className="bg-[#11111a] border border-[#2b2b3c] rounded-xl p-5 hover:border-blue-600 hover:shadow-[0_0_20px_rgba(0,122,255,0.2)] transition-all duration-300"
+                                    className="relative bg-[#11111a] border border-[#2b2b3c] rounded-xl p-5 hover:border-blue-600 hover:shadow-[0_0_20px_rgba(0,122,255,0.2)] transition-all duration-300"
                                 >
-                                    <div className="mb-3">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between mb-3">
                                         <h4 className="text-lg font-semibold text-white">
                                             {project.name || "Untitled Project"}
                                         </h4>
-                                        <p className="text-gray-400 text-sm">{project.details || "No details provided."}</p>
                                     </div>
 
+                                    {/* Core Info */}
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div>
                                             <span className="text-gray-500">Client:</span>
@@ -214,11 +238,23 @@ const Demo = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mt-4">
+                                    {/* Divider */}
+                                    <div className="my-4 border-t border-[#1f1f2e]"></div>
+
+                                    {/* Details */}
+                                    <div className="mt-2">
+                                        <p className="text-gray-500 mb-1">Details:</p>
+                                        <div className="bg-[#0f0f17] border border-blue-900/30 p-3 rounded-lg max-h-32 overflow-y-auto text-gray-300 text-xs leading-relaxed">
+                                            {project.details || "No details provided."}
+                                        </div>
+                                    </div>
+
+                                    {/* Notes */}
+                                    <div className="mt-3">
                                         <span className="text-gray-500 block">Notes:</span>
-                                        <p className="text-gray-300 text-sm italic">
+                                        <div className="bg-[#0f0f17] border border-[#2b2b3c] p-3 rounded-lg text-gray-300 text-xs leading-relaxed">
                                             {project.notes && project.notes !== "nulling" ? project.notes : "No notes added."}
-                                        </p>
+                                        </div>
                                     </div>
 
                                     <div className="flex justify-between items-center mt-6">
@@ -238,6 +274,11 @@ const Demo = () => {
                                             </button>
                                         </div>
                                     </div>
+
+                                    {/* Status Badge */}
+                                    <div className="absolute top-4 right-4 bg-blue-900/30 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold border border-blue-700/50">
+                                        Pending
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -245,7 +286,7 @@ const Demo = () => {
                 </div>
 
                 {/* Accepted Projects */}
-                <div className="bg-[#0a0a0f] rounded-2xl shadow-lg p-5 border border-[#1f1f2e] hover:border-green-600 transition-all duration-300">
+                <div className="bg-[#0a0a0f] rounded-2xl shadow-lg p-5 border border-[#1f1f2e] transition-all duration-300">
                     <h3 className="text-xl font-semibold text-green-400 mb-4 flex items-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                         Accepted Projects
@@ -258,14 +299,13 @@ const Demo = () => {
                             {acceptedProjects.map((project) => (
                                 <li
                                     key={project.id}
-                                    className="bg-[#11111a] border border-[#2b2b3c] rounded-xl p-5 hover:border-green-600 hover:shadow-[0_0_20px_rgba(34,197,94,0.2)] transition-all duration-300"
+                                    className="relative bg-[#11111a] border border-[#2b2b3c] rounded-xl p-5 hover:border-green-600 hover:shadow-[0_0_20px_rgba(34,197,94,0.2)] transition-all duration-300"
                                 >
                                     {/* Header */}
-                                    <div className="mb-3">
+                                    <div className="flex items-center justify-between mb-3">
                                         <h4 className="text-lg font-semibold text-white">
                                             {project.name || "Untitled Project"}
                                         </h4>
-                                        <p className="text-gray-400 text-sm">{project.details || "No description available."}</p>
                                     </div>
 
                                     {/* Info Grid */}
@@ -328,14 +368,25 @@ const Demo = () => {
                                         </div>
                                     </div>
 
+                                    {/* Divider */}
+                                    <div className="my-4 border-t border-[#1f1f2e]"></div>
+
+                                    {/* Details */}
+                                    <div className="mt-2">
+                                        <p className="text-gray-500 mb-1">Details:</p>
+                                        <div className="bg-[#0f0f17] border border-green-900/30 p-3 rounded-lg max-h-32 overflow-y-auto text-gray-300 text-xs leading-relaxed">
+                                            {project.details || "No description available."}
+                                        </div>
+                                    </div>
+
                                     {/* Notes */}
-                                    <div className="mt-4">
+                                    <div className="mt-3">
                                         <span className="text-gray-500 block">Notes:</span>
-                                        <p className="text-gray-300 text-sm italic">
+                                        <div className="bg-[#0f0f17] border border-[#2b2b3c] p-3 rounded-lg text-gray-300 text-xs leading-relaxed">
                                             {project.notes && project.notes !== "nulling"
                                                 ? project.notes
                                                 : "No notes available."}
-                                        </p>
+                                        </div>
                                     </div>
 
                                     {/* Footer */}
@@ -345,6 +396,11 @@ const Demo = () => {
                                             {project.status?.toUpperCase() || "ACCEPTED"}
                                         </span>
                                     </div>
+
+                                    {/* Status Badge */}
+                                    <div className="absolute top-4 right-4 bg-green-900/30 text-green-300 px-3 py-1 rounded-full text-xs font-semibold border border-green-700/50">
+                                        Accepted
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -352,7 +408,7 @@ const Demo = () => {
                 </div>
 
                 {/* Rejected Projects */}
-                <div className="bg-[#0a0a0f] rounded-2xl shadow-lg p-5 border border-[#1f1f2e] hover:border-red-600 transition-all duration-300">
+                <div className="bg-[#0a0a0f] rounded-2xl shadow-lg p-5 border border-[#1f1f2e]  transition-all duration-300">
                     <h3 className="text-xl font-semibold text-red-400 mb-4 flex items-center gap-2">
                         <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                         Rejected Projects
@@ -369,7 +425,6 @@ const Demo = () => {
                                     {/* Header */}
                                     <div className="flex items-center justify-between mb-3">
                                         <h2 className="text-lg font-semibold tracking-wide text-white">{project.name}</h2>
-                                        <XCircle className="text-red-400 w-6 h-6" />
                                     </div>
 
                                     {/* Core Info */}
@@ -440,6 +495,12 @@ const Demo = () => {
                                         <div className="bg-[#0f0f17] border border-red-900/30 p-3 rounded-lg max-h-32 overflow-y-auto text-gray-300 text-xs leading-relaxed">
                                             {project.details}
                                         </div>
+                                        <button
+                                            onClick={() => handleProjectDeletion(project)}
+                                            className="px-4 py-1.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold rounded-lg transition-all duration-300 mt-4 hover:cursor-pointer"
+                                        >
+                                            🗑️ Delete
+                                        </button>
                                     </div>
 
                                     {/* Status Badge */}
@@ -565,9 +626,55 @@ const Demo = () => {
                         </div>
                     </>
                 )}
+                {projectDeletionModalIsOpen && (
+                    <>
+                        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+                            <div className="bg-[#0a0a0f] border border-[#1f1f2e] rounded-2xl shadow-xl w-full max-w-md p-6 relative text-white">
+                                <h3 className="text-xl font-semibold mb-4 text-red-500">Delete Project</h3>
+                                <form onSubmit={handleDeletionBtn}>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-300 font-medium mb-1">Project Name</label>
+                                        <div className="bg-[#11111a] border border-[#2b2b3c] rounded-lg px-3 py-2 text-gray-200">
+                                            {selectedProject?.name || "Untitled Project"}
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-300 font-medium mb-1">Project Details</label>
+                                        <div className="bg-[#11111a] border border-[#2b2b3c] rounded-lg px-3 py-2 text-gray-200">
+                                            {selectedProject?.details || "No description."}
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-300 font-medium mb-1">
+                                            Are you sure you want to delete this project? This action cannot be undone.
+                                        </label>
+                                    </div>
+                                    <div className="flex justify-end gap-3 mt-6">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-[#1a1a28] hover:bg-[#222233] text-gray-200 rounded-lg font-semibold border border-[#2b2b3c]"
+                                            onClick={() => {
+                                                setProjectDeletionModalIsOpen(false);
+                                                setSelectedProject(null);
+                                            }}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-lg font-semibold"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     )
 }
 
-export default Demo;
+export default ProjectsList;

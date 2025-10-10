@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import useUserData from '../../constants/data/useUserData';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../constants/firebase';
-import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus, Atom } from 'lucide-react';
 import { gsap } from 'gsap';
 import NotificationsPanel from './NotificationsPanel';
 import { getDoc, addDoc, getDocs, where, query, setDoc, collection, doc, serverTimestamp, orderBy, onSnapshot } from 'firebase/firestore';
@@ -474,6 +474,39 @@ const Navbar = () => {
                                                         <User className="w-4 h-4 text-orange-400 group-hover:text-orange-300 transition-colors" />
                                                         <span className="text-sm font-medium">Profile</span>
                                                     </a>
+                                                    {role === 'admin' && (
+                                                        <>
+                                                            <a
+                                                                href="/adminDashboard"
+                                                                className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-pink-400 transition-all duration-200 group"
+                                                            >
+                                                                <span>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-pink-400 group-hover:text-pink-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" />
+                                                                    </svg>
+                                                                </span>
+                                                                <span className="text-sm font-medium">Dashboard</span>
+                                                            </a>
+                                                        </>
+                                                    )}
+
+                                                    {owner && (
+
+                                                        <>
+                                                            <a
+                                                                href="/Dashboard1"
+                                                                className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-pink-400 transition-all duration-200 group"
+                                                            >
+                                                                <span>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-pink-400 group-hover:text-pink-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" />
+                                                                    </svg>
+                                                                </span>
+                                                                <span className="text-sm font-medium">Dashboard</span>
+                                                            </a>
+                                                        </>
+
+                                                    )}
 
                                                     <a
                                                         href="/accountSettings"
@@ -514,6 +547,19 @@ const Navbar = () => {
                                                                 <Plus className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
                                                                 <span className="text-sm font-medium">Create a Project</span>
                                                             </a>
+                                                            {owner || role === 'admin' && (
+                                                                <>
+                                                                    <a
+                                                                        href="/projectsRequests"
+                                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-fuchsia-800-400 transition-all duration-200 group"
+                                                                    >
+                                                                        <span>
+                                                                            <Atom className="w-4 h-4 text-fuchsia-400 group-hover:text-fuchsia-800 transition-colors" />
+                                                                        </span>
+                                                                        <span className="text-sm font-medium group-hover:text-fuchsia-400 transition-colors">Projects Requests</span>
+                                                                    </a>
+                                                                </>
+                                                            )}
                                                         </motion.div>
                                                     )}
 
