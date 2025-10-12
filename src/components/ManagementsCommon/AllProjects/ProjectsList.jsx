@@ -6,10 +6,14 @@ import MissingPermissions from '../../../constants/components/missingPermissions
 import Loading from '../../../constants/components/Loading';
 import NotSignedIn from '../../../constants/components/NotSignedIn';
 import { XCircle } from "lucide-react";
+import { Link } from 'react-router';
 
 
 
 const ProjectsList = () => {
+
+    const lorem = ['Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolor deleniti veniam architecto, impedit, provident quidem qui repudiandae culpa voluptatem possimus illum quibusdam esse ad officiis officia nobis, dolores optio ullam.']
+
     const { user, uid, owner, role, loading, firstName, surName } = useUserData();
     const [pendingProjects, setPendingProjects] = useState([]);
     const [acceptedProjects, setAcceptedProjects] = useState([]);
@@ -206,8 +210,14 @@ const ProjectsList = () => {
                                     {/* Core Info */}
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div>
-                                            <span className="text-gray-500">Client:</span>
-                                            <p className="text-white">{project.clientName || "Unknown"}</p>
+                                            <span className="text-gray-500 inline">Client:</span>
+                                            <br />
+                                            <Link
+                                                to={`/accs/${project.clientUID}`}
+                                                className="text-blue-400 hover:underline"
+                                            >
+                                                {project.clientName}
+                                            </Link>
                                         </div>
                                         <div>
                                             <span className="text-gray-500">Business Type:</span>

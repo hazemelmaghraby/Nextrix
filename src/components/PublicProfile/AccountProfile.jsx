@@ -2,33 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { db } from "../../constants/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { Github, Linkedin, Instagram, Crown } from "lucide-react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Instagram } from "lucide-react";
+
+
 
 const AccountProfile = () => {
     const { uid } = useParams();
     const [userData, setUserData] = useState(null);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            const ref = doc(db, "users", uid);
-            const snap = await getDoc(ref);
-            if (snap.exists()) {
-                setUserData(snap.data());
-            } else {
-                console.log("No such user!");
-            }
-        };
-
-        if (uid) fetchUser();
-    }, [uid]);
-
-    if (!userData)
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <p className="text-gray-400 animate-pulse">Loading profile...</p>
-            </div>
-        );
+    const [teamMembersData, setTeamMembersData] = useState([]);
+    const [teamLoading, setTeamLoading] = useState(false);
 
     const {
         avatarURL,
@@ -44,101 +28,178 @@ const AccountProfile = () => {
         role,
         owner,
         careerRoles,
-    } = userData;
+        teamName,
+        teamMembersUID
+    } = userData || {};
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const ref = doc(db, "users", uid);
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+                setUserData(snap.data());
+            } else {
+                console.log("No such user!");
+            }
+        };
+
+        if (uid) fetchUser();
+    }, [uid]);
+
+    useEffect(() => {
+        // Avoid running if teamMembersUID is undefined/null - always set state so hook count doesn't change
+        setTeamLoading(true);
+        const fetchTeamMembers = async () => {
+            if (Array.isArray(teamMembersUID) && teamMembersUID.length > 0) {
+                try {
+                    // Fetch all user docs in parallel
+                    const userFetches = teamMembersUID.map(uid =>
+                        getDoc(doc(db, "users", uid))
+                    );
+                    const userSnaps = await Promise.all(userFetches);
+                    const members = userSnaps
+                        .filter(snap => snap.exists())
+                        .map(snap => ({ id: snap.id, ...snap.data() }));
+                    setTeamMembersData(members);
+                } catch (err) {
+                    setTeamMembersData([]);
+                } finally {
+                    setTeamLoading(false);
+                }
+            } else {
+                setTeamMembersData([]);
+                setTeamLoading(false);
+            }
+        };
+        fetchTeamMembers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [teamMembersUID && Array.isArray(teamMembersUID) ? teamMembersUID.join(',') : '']);
+
+    if (!userData)
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <p className="text-gray-400 animate-pulse">Loading profile...</p>
+            </div>
+        );
+
+
+    const fadeIn = {
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    };
+
 
     const info = profileInfo || {};
     const displayName = `${firstName || ""} ${surName || ""}`.trim();
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#0b0c10] to-[#0e0f13] text-white flex flex-col items-center py-16 px-6">
+        <div className="min-h-screen flex items-center justify-center py-16 px-6 bg-gradient-to-br from-black via-gray-900/90 to-black text-gray-100">
             <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="bg-[#111217]/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl min-h-[100vh] max-w-[85%] w-full border border-white/10"
+                className="w-full max-w-5xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl p-8 backdrop-blur-2xl"
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
             >
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
+                {/* HEADER */}
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-8 border-b border-white/10 pb-8 mb-8">
                     <img
                         src={avatarURL}
                         alt={displayName}
-                        className="w-40 h-40 rounded-2xl object-cover border border-white/20 shadow-lg"
+                        className="w-40 h-40 rounded-2xl object-cover border-2 border-white/20 shadow-lg"
                     />
-                    <div className="flex-1 text-center sm:text-left">
-                        <h1 className="text-3xl font-semibold">
+                    <div className="flex-1 text-center md:text-left">
+                        {/* 
+                            The condition is not working as intended because you are not properly spacing/classing the conditional tailwind classes.
+                            Also, putting `bg-clip-text text-transparent` after a solid color like 'text-yellow-500' will make the text transparent and appear black, since the solid color overrides the bg-clip gradient.
+                            If you want a conditional color OR a gradient, you need to build the className string correctly, e.g.:
+                        */}
+                        <h1
+                            className={
+                                `text-4xl font-bold ` +
+                                (
+                                    owner
+                                        ? 'text-yellow-500'
+                                        : role === 'admin'
+                                            ? 'text-red-700'
+                                            : role === 'moderator'
+                                                ? 'text-purple-600'
+                                                : 'bg-gradient-to-r from-orange-400 to-blue-400 bg-clip-text text-transparent'
+                                )
+                            }
+                        >
                             {displayName || "Unnamed User"}
                         </h1>
                         {username && (
-                            <p className="text-gray-400">@{username}</p>
+                            <div className="">
+                                <p className="text-gray-400 text-sm">@{username}</p>
+                                <p className={`${owner ? 'text-amber-300' : 'text-white'} text-xl`}>{title}</p>
+                            </div>
                         )}
-                        {title && (
-                            <p className="text-lg text-blue-400 mt-2">{title}</p>
-                        )}
-                        {role && (
-                            <>
-                                <p className="text-lg text-blue-400 mt-2">{role}</p>
-                            </>
-                        )}
-                        {owner && (
-                            <>
-                                <p className="text-lg text-blue-400 mt-2">Owner</p>
-                            </>
-                        )}
-                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3">
-                            {level && (
-                                <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">
-                                    {level}
+                        <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                            {role && !owner && (
+                                <span className="px-4 py-1 rounded-full text-sm bg-purple-500/20 text-purple-300 border border-purple-500/30 capitalize">
+                                    {role}
                                 </span>
                             )}
                             {premium && (
-                                <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm">
+                                <span className="px-4 py-1 rounded-full text-sm bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
                                     Premium
                                 </span>
                             )}
                             {certified && (
-                                <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">
+                                <span className="px-4 py-1 rounded-full text-sm bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                                     Certified
+                                </span>
+                            )}
+                            {owner && (
+                                <span className="px-4 py-1 rounded-full text-sm bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                                    Owner
                                 </span>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Bio */}
+                {/* BIO */}
                 {bio && (
-                    <p className="text-gray-300 leading-relaxed mb-8">
+                    <motion.p
+                        className="text-gray-300 leading-relaxed mb-8 text-center md:text-left"
+                        variants={fadeIn}
+                        initial="hidden"
+                        animate="visible"
+                    >
                         {bio}
-                    </p>
+                    </motion.p>
                 )}
 
-                {/* Profile Info */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                    {info.level && (
-                        <div className="bg-white/5 p-3 rounded-lg">
-                            <h3 className="text-sm text-gray-400">Level</h3>
-                            <p className="text-white font-medium">{info.level}</p>
-                        </div>
-                    )}
+                {/* INFO GRID */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                     {info.title && (
-                        <div className="bg-white/5 p-3 rounded-lg">
-                            <h3 className="text-sm text-gray-400">Title</h3>
-                            <p className="text-white font-medium">{info.title}</p>
+                        <div className="bg-black/40 rounded-xl p-4 border border-white/10">
+                            <p className="font-semibold text-gray-400">Title</p>
+                            <p>{info.title}</p>
                         </div>
                     )}
-                    {careerRoles && (
-                        <div className="bg-white/5 p-3 rounded-lg">
-                            <h3 className="text-sm text-gray-400">Title</h3>
-                            <p className="bg-red-500/20 text-red-300 px-2 py-1 text-sm rounded-md">{info.careerRoles}</p>
+                    {info.level && (
+                        <div className="bg-black/40 rounded-xl p-4 border border-white/10">
+                            <p className="font-semibold text-gray-400">Level</p>
+                            <p>{info.level}</p>
+                        </div>
+                    )}
+                    {info.careerRoles && (
+                        <div className="bg-black/40 rounded-xl p-4 border border-white/10 sm:col-span-2">
+                            <p className="font-semibold text-gray-400">Career Roles</p>
+                            <p className="text-red-300">{info.careerRoles}</p>
                         </div>
                     )}
                     {info.skills && info.skills.length > 0 && (
-                        <div className="bg-white/5 p-3 rounded-lg sm:col-span-2">
-                            <h3 className="text-sm text-gray-400 mb-1">Skills</h3>
+                        <div className="bg-black/40 rounded-xl p-4 border border-white/10 sm:col-span-2">
+                            <p className="font-semibold text-gray-400 mb-2">Skills</p>
                             <div className="flex flex-wrap gap-2">
                                 {info.skills.map((skill, i) => (
                                     <span
                                         key={i}
-                                        className="bg-blue-500/20 text-blue-300 px-2 py-1 text-sm rounded-md"
+                                        className="px-3 py-1 rounded-lg text-sm bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-300"
                                     >
                                         {skill}
                                     </span>
@@ -148,8 +209,59 @@ const AccountProfile = () => {
                     )}
                 </div>
 
-                {/* Links */}
-                <div className="flex justify-center gap-6 mt-4">
+                {/* TEAM SECTION */}
+                {teamName && (
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-orange-400 bg-clip-text text-transparent">
+                            Team: {teamName}
+                        </h2>
+
+                        {teamLoading ? (
+                            <p className="text-gray-400 animate-pulse">Loading team members...</p>
+                        ) : (
+                            teamMembersData.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                                    {teamMembersData.map((member) => (
+                                        <motion.div
+                                            key={member.id}
+                                            className="bg-black/40 p-4 rounded-xl border border-white/10 flex items-center gap-4 hover:scale-[1.02] transition-transform duration-300"
+                                            whileHover={{ scale: 1.02 }}
+                                        >
+                                            <img
+                                                src={member.avatarURL}
+                                                alt={member.firstName || member.username || "User"}
+                                                className="w-14 h-14 rounded-xl object-cover border border-white/20"
+                                            />
+                                            <div>
+                                                <Link
+                                                    to={`/accs/${member.id}`}
+                                                    className="font-semibold text-white text-sm hover:text-blue-400 transition"
+                                                >
+                                                    {`${member.firstName || ""} ${member.surName || ""}`.trim() ||
+                                                        member.username ||
+                                                        "Unnamed"}
+                                                </Link>
+                                                {member.role && (
+                                                    <div className={`text-xs ${member.role === 'admin' ? 'text-red-500' : 'text-blue-400'}`}>
+                                                        {member.role.charAt(0).toUpperCase() + member.role.slice(1).toLowerCase()}
+                                                    </div>
+                                                )}
+                                                {info.level && (
+                                                    <div className="text-xs text-gray-400">
+                                                        Lv. {info.level}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )
+                        )}
+                    </div>
+                )}
+
+                {/* LINKS */}
+                <div className="flex justify-center gap-6 mt-10">
                     {info.github && (
                         <a
                             href={info.github}
