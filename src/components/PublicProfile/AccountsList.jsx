@@ -53,31 +53,31 @@ const AccountsList = () => {
 
                                 {/* Name & Role */}
                                 <h3 className="text-xl font-semibold text-center">
-                                    {u.firstName || u.name || "Unnamed User"}
+                                    {u.firstName || u.name || "Unnamed User"} {u.surName}
                                 </h3>
 
                                 <p className="text-center text-gray-400 text-sm">
-                                    {u.title || "No title specified"}
+                                    {u.profileInfo.title || "No title specified"}
                                 </p>
 
                                 {/* Level */}
-                                {u.level && (
+                                {u.profileInfo.level && (
                                     <p className="text-center text-sm mt-1 text-blue-400">
-                                        Level: {u.level}
+                                        Level: {u.profileInfo.level}
                                     </p>
                                 )}
 
                                 {/* Bio */}
-                                {u.bio && (
+                                {u.profileInfo.bio && (
                                     <p className="text-gray-400 text-sm mt-3 text-center line-clamp-3">
-                                        {u.bio}
+                                        {u.profileInfo.bio}
                                     </p>
                                 )}
 
                                 {/* Skills */}
-                                {u.skills && Array.isArray(u.skills) && u.skills.length > 0 && (
+                                {u.profileInfo.skills && Array.isArray(u.profileInfo.skills) && u.profileInfo.skills.length > 0 && (
                                     <div className="flex flex-wrap gap-1 mt-4 justify-center">
-                                        {u.skills.slice(0, 4).map((skill, i) => (
+                                        {u.profileInfo.skills.slice(0, 4).map((skill, i) => (
                                             <span
                                                 key={i}
                                                 className="bg-blue-500/20 border border-blue-500/30 text-blue-300 px-2 py-1 text-xs rounded-full"
@@ -85,7 +85,7 @@ const AccountsList = () => {
                                                 {skill}
                                             </span>
                                         ))}
-                                        {u.skills.length > 4 && (
+                                        {u.profileInfo.skills.length > 4 && (
                                             <span className="text-gray-500 text-xs">+{u.skills.length - 4}</span>
                                         )}
                                     </div>

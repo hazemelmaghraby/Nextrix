@@ -93,7 +93,7 @@ const AccountProfile = () => {
     const displayName = `${firstName || ""} ${surName || ""}`.trim();
 
     return (
-        <div className="min-h-screen flex items-center justify-center py-16 px-6 bg-gradient-to-br from-black via-gray-900/90 to-black text-gray-100">
+        <div className="min-h-screen flex items-center justify-center py-16 px-6 bg-gradient-to-br from-black via-gray-900/90 to-black text-gray-100 mt-10">
             <motion.div
                 className="w-full max-w-5xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl p-8 backdrop-blur-2xl"
                 variants={fadeIn}
@@ -108,11 +108,6 @@ const AccountProfile = () => {
                         className="w-40 h-40 rounded-2xl object-cover border-2 border-white/20 shadow-lg"
                     />
                     <div className="flex-1 text-center md:text-left">
-                        {/* 
-                            The condition is not working as intended because you are not properly spacing/classing the conditional tailwind classes.
-                            Also, putting `bg-clip-text text-transparent` after a solid color like 'text-yellow-500' will make the text transparent and appear black, since the solid color overrides the bg-clip gradient.
-                            If you want a conditional color OR a gradient, you need to build the className string correctly, e.g.:
-                        */}
                         <h1
                             className={
                                 `text-4xl font-bold ` +
@@ -132,14 +127,19 @@ const AccountProfile = () => {
                         {username && (
                             <div className="">
                                 <p className="text-gray-400 text-sm">@{username}</p>
-                                <p className={`${owner ? 'text-amber-300' : 'text-white'} text-xl`}>{title}</p>
+                                <p className={`${owner ? 'text-amber-300' : role === 'admin' ? 'text-red-300' : 'text-white'} text-xl`}>{info.title}</p>
                             </div>
                         )}
                         <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
-                            {role && !owner && (
-                                <span className="px-4 py-1 rounded-full text-sm bg-purple-500/20 text-purple-300 border border-purple-500/30 capitalize">
+                            {role === 'admin' && !owner && (
+                                <motion.span
+                                    className="px-4 py-1 rounded-full text-sm bg-red-500/20 text-red-300 border border-red-500/30 capitalize"
+                                    variants={fadeIn}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     {role}
-                                </span>
+                                </motion.span>
                             )}
                             {premium && (
                                 <span className="px-4 py-1 rounded-full text-sm bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
@@ -242,7 +242,7 @@ const AccountProfile = () => {
                                                         "Unnamed"}
                                                 </Link>
                                                 {member.role && (
-                                                    <div className={`text-xs ${member.role === 'admin' ? 'text-red-500' : 'text-blue-400'}`}>
+                                                    <div className={`text-xs ${member.role === 'admin' ? 'text-red-500' : member.owner ? 'text-yellow-400' : 'text-blue-400'}`}>
                                                         {member.role.charAt(0).toUpperCase() + member.role.slice(1).toLowerCase()}
                                                     </div>
                                                 )}
