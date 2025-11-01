@@ -30,6 +30,10 @@ import ProjectsList from './components/ManagementsCommon/AllProjects/ProjectsLis
 import OurTeam from './components/OurTeam/OurTeam';
 import AccountsList from './components/PublicProfile/AccountsList';
 import AccountProfile from './components/PublicProfile/AccountProfile';
+import Financials from './components/Ownership/OwnershipDashboard/Financials/Financials';
+import AdminsManagement from './components/Ownership/OwnershipDashboard/AdminsManagement/AdminsManagement';
+import Marketplace from './components/Marketplace/Marketplace';
+import Cart from './components/Marketplace/Cart/Cart';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -82,6 +86,8 @@ function App() {
         <Route path='/pricing' element={<PricingSection />} />
         <Route path='/Dashboard1' element={<ODashboard />} />
         <Route path='/accountsPanel' element={<AccountsPanel />} />
+        <Route path='/financials' element={<Financials />} />
+        <Route path='/adminsManagement' element={<AdminsManagement />} />
         <Route path='/verification' element={<Verification />} />
         <Route path='/addProject' element={<CreateProject />} />
         <Route path='/userPortfolio' element={<Portfolio />} />
@@ -93,7 +99,8 @@ function App() {
         <Route path='/demo' element={<Demo />} />
         <Route path='/accs' element={<AccountsList />} />
         <Route path='/accs/:uid' element={<AccountProfile />} />
-
+        <Route path='/marketplace' element={<Marketplace />} />
+        <Route path='/cart' element={<Cart />} />
       </Route>
     </Route>
   ))

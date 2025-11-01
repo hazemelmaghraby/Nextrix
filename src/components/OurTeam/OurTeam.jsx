@@ -5,7 +5,7 @@ import { Github, Linkedin, Mail } from "lucide-react";
 const teamMembers = [
     {
         name: "Hazem El-Maghraby",
-        role: "Front-End Developer",
+        role: "CEO",
         bio: "Specialized in building dynamic, modern user interfaces with React & Tailwind.",
         img: "/Hazem.jpg",
         github: "#",
@@ -14,9 +14,9 @@ const teamMembers = [
         portfolio: 'you'
     },
     {
-        name: "Ahmed Ali",
-        role: "Back-End Developer",
-        bio: "Passionate about secure APIs, scalability, and clean backend architecture.",
+        name: "Maria W. Miller",
+        role: "CTO",
+        bio: "",
         img: "",
         github: "#",
         linkedin: "#",

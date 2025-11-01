@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CheckCircle, BadgeDollarSign, AtSign, ShieldUser, FolderGit2, Eye, DatabaseZap, ChartColumnDecreasing, DollarSign, Cloud, List } from 'lucide-react';
+import { CheckCircle, Bell, BadgeDollarSign, AtSign, ShieldUser, FolderGit2, Eye, DatabaseZap, ChartColumnDecreasing, DollarSign, Cloud, List } from 'lucide-react';
 import useUserData from '../../../constants/data/useUserData';
-import NotSignedIn from '../../../constants/components/NotSignedIn';
-import MissingPermissions from '../../../constants/components/missingPermissions';
-import Loading from '../../../constants/components/Loading';
+import NotSignedIn from '../../../constants/components/NotSignedIn.jsx';
+import MissingPermissions from '../../../constants/components/missingPermissions.jsx';
+import Loading from '../../../constants/components/Loading.jsx';
 
 const ODashboard = () => {
     const sectionRef = useRef(null);
@@ -104,7 +104,7 @@ const ODashboard = () => {
         {
             label: "Admins Management",
             onClick: () => {
-                window.location.href = '/adminsManagment';
+                window.location.href = '/adminsManagement';
             },
             icon: <ShieldUser />
         },
@@ -115,11 +115,11 @@ const ODashboard = () => {
             }, icon: <ChartColumnDecreasing />
         },
         {
-            label: "Cloud Integration",
+            label: "Announcements Center",
             onClick: () => {
-                window.location.href = '/cloud-integration';
+                window.location.href = '/announcementsCenter';
             },
-            icon: <Cloud />
+            icon: <Bell />
         },
         {
             label: "API Development",

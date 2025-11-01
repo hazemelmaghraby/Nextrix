@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import useUserData from '../../constants/data/useUserData';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../constants/firebase';
-import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus, Atom } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus, Atom, ShoppingCart } from 'lucide-react';
 import { gsap } from 'gsap';
 import NotificationsPanel from './NotificationsPanel';
 import { getDoc, addDoc, getDocs, where, query, setDoc, collection, doc, serverTimestamp, orderBy, onSnapshot } from 'firebase/firestore';
 import Logo from '/Logo.png';
 import { motion } from "framer-motion";
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router';
 
 
 const Navbar = () => {
@@ -20,6 +22,8 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [projectsMenuIsOpen, setProjectsMenuIsOpen] = useState()
     const dropdownRef = useRef();
+    const [cartItems, setCartItems] = useState([]);
+    const items = useSelector(state => state.itemsReducer.items);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -79,12 +83,12 @@ const Navbar = () => {
 
             // 🔑 Check docChanges to only detect *newly added* notifications
             snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const audio = new Audio("/notification.mp3"); // put your file in /public
-                    audio.play().catch((err) =>
-                        console.log("Audio play blocked:", err)
-                    );
-                }
+                // if (change.type === "added") {
+                //     const audio = new Audio("/notification.mp3"); // put your file in /public
+                //     audio.play().catch((err) =>
+                //         console.log("Audio play blocked:", err)
+                //     );
+                // }
             });
 
             // Update state with all notifications
@@ -273,6 +277,23 @@ const Navbar = () => {
                                             )}
                                         </div>
 
+                                        {/* ======================================== */}
+
+                                        {/* Cart Button */}
+                                        <div className="relative flex items-center ml-2.5">
+                                            <Link
+                                                to='/cart'
+                                                className="flex hover:cursor-pointer items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500/10 via-black/10 to-blue-500/10 border border-white/10 hover:bg-orange-500/20 transition"
+                                            >
+                                                <ShoppingCart className="w-5 h-5 text-orange-400" />
+                                                <span className="inline-flex items-center px-2 py-1.5 rounded-full bg-orange-500/20 text-xs font-semibold text-orange-300">
+                                                    {items.length}
+                                                </span>
+                                            </Link>
+                                            <ChevronDown
+                                                className={`w-4 h-4 text-gray-300 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                                            />
+                                        </div>
                                         {/* ======================================== */}
 
                                         <div className="header-item flex items-center gap-4">

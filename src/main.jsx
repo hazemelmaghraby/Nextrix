@@ -3,12 +3,16 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import './App.css'
-import ErrorBoundary from './constants/components/ErrorBoundary.jsx'
+import ErrorBoundary from './constants/components/ErrorBoundary.jsx';
+import { Provider } from 'react-redux';
+import store from './constants/Redux/store.js';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
     </ErrorBoundary>
   </StrictMode>,
 )
