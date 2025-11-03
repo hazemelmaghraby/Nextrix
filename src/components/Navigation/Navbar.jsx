@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useUserData from '../../constants/data/useUserData';
-import { signOut } from 'firebase/auth';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../constants/firebase';
-import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus, Atom, ShoppingCart } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, ChevronDown, UserStar, Crown, Projector, BriefcaseBusiness, BadgeCheck, Plus, Atom, ShoppingCart, Store, BookCopy } from 'lucide-react';
 import { gsap } from 'gsap';
 import NotificationsPanel from './NotificationsPanel';
 import { getDoc, addDoc, getDocs, where, query, setDoc, collection, doc, serverTimestamp, orderBy, onSnapshot } from 'firebase/firestore';
 import Logo from '/Logo.png';
 import { motion } from "framer-motion";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router';
+import { loadCart, loadCartFromFirestore } from '../../constants/Redux/items/itemsSlice';
 
 
 const Navbar = () => {
+    const dispatch = useDispatch();
     const { firstName, surName, username, role, gender, phone, owner, premium, uid, avatar } = useUserData();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -22,8 +24,20 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [projectsMenuIsOpen, setProjectsMenuIsOpen] = useState()
     const dropdownRef = useRef();
-    const [cartItems, setCartItems] = useState([]);
     const items = useSelector(state => state.itemsReducer.items);
+
+    // Load cart from Firestore on mount and when user changes
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const cartItems = await loadCartFromFirestore();
+                dispatch(loadCart(cartItems));
+            } else {
+                dispatch(loadCart([]));
+            }
+        });
+        return () => unsubscribe();
+    }, [dispatch]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -290,9 +304,6 @@ const Navbar = () => {
                                                     {items.length}
                                                 </span>
                                             </Link>
-                                            <ChevronDown
-                                                className={`w-4 h-4 text-gray-300 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-                                            />
                                         </div>
                                         {/* ======================================== */}
 
@@ -535,6 +546,22 @@ const Navbar = () => {
                                                     >
                                                         <Settings className="w-4 h-4 text-blue-400 group-hover:text-blue-300 transition-colors" />
                                                         <span className="text-sm font-medium">Settings</span>
+                                                    </a>
+
+                                                    <a
+                                                        href="/marketplace"
+                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-amber-400 transition-all duration-200 group"
+                                                    >
+                                                        <Store className="w-4 h-4 text-amber-700 group-hover:text-amber-300 transition-colors" />
+                                                        <span className="text-sm font-medium">Marketplace</span>
+                                                    </a>
+
+                                                    <a
+                                                        href="/Sessions"
+                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-amber-400 transition-all duration-200 group"
+                                                    >
+                                                        <BookCopy className="w-4 h-4 text-zinc-300 group-hover:text-lime-400 transition-colors" />
+                                                        <span className="text-sm font-medium">Sessions</span>
                                                     </a>
 
                                                     <a

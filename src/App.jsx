@@ -34,6 +34,10 @@ import Financials from './components/Ownership/OwnershipDashboard/Financials/Fin
 import AdminsManagement from './components/Ownership/OwnershipDashboard/AdminsManagement/AdminsManagement';
 import Marketplace from './components/Marketplace/Marketplace';
 import Cart from './components/Marketplace/Cart/Cart';
+import Books from './components/Marketplace/Books/Books';
+import SessionCodesMarketplace from './components/Marketplace/SessionsCodes/SessionCodesMarketplace';
+import Courses from './components/LMS/Courses/Courses';
+import LMSHome from './components/LMS/Home/LMSHome';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -100,6 +104,10 @@ function App() {
         <Route path='/accs' element={<AccountsList />} />
         <Route path='/accs/:uid' element={<AccountProfile />} />
         <Route path='/marketplace' element={<Marketplace />} />
+        <Route path='/marketplace/books' element={<Books />} />
+        <Route path='/marketplace/sessionCodes' element={<SessionCodesMarketplace />} />
+        <Route path='/lms/courses' element={<Courses />} />
+        <Route path='/lms' element={<LMSHome />} />
         <Route path='/cart' element={<Cart />} />
       </Route>
     </Route>
