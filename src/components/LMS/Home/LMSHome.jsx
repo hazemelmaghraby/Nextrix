@@ -14,8 +14,8 @@ const LMSHome = () => {
     return (
         <div className="relative min-h-screen bg-gradient-to-br from-black via-blue-950 to-zinc-950 py-28 overflow-hidden">
             {/* Glow effects */}
-            <div className="absolute top-10 left-10 w-64 h-64 bg-blue-600/50 rounded-full blur-3xl animate-pulse z-0" />
-            <div className="absolute bottom-20 right-10 w-[30rem] h-[30rem] bg-cyan-400/20 rounded-full blur-3xl animate-pulse z-0" />
+            {/* <div className="absolute top-10 left-10 w-64 h-64 bg-blue-600/50 rounded-full blur-3xl animate-pulse z-0" /> */}
+            <div className="absolute bottom-20 right-10 w-[30rem] h-[30rem] bg-cyan-300 rounded-full blur-3xl animate-pulse z-0" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,100,255,0.08),transparent_60%)] pointer-events-none" />
 
             {/* Hero Section */}

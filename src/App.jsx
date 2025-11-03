@@ -38,6 +38,7 @@ import Books from './components/Marketplace/Books/Books';
 import SessionCodesMarketplace from './components/Marketplace/SessionsCodes/SessionCodesMarketplace';
 import Courses from './components/LMS/Courses/Courses';
 import LMSHome from './components/LMS/Home/LMSHome';
+import LMSLayout from './components/LMS/Layout/LMSLayout';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -106,9 +107,13 @@ function App() {
         <Route path='/marketplace' element={<Marketplace />} />
         <Route path='/marketplace/books' element={<Books />} />
         <Route path='/marketplace/sessionCodes' element={<SessionCodesMarketplace />} />
-        <Route path='/lms/courses' element={<Courses />} />
-        <Route path='/lms' element={<LMSHome />} />
         <Route path='/cart' element={<Cart />} />
+      </Route>
+
+      <Route path='/lms' element={<LMSLayout />}>
+        <Route index element={<LMSHome />} />
+        <Route path='courses' element={<Courses />} />
+        {/* Add more LMS-specific pages here */}
       </Route>
     </Route>
   ))
