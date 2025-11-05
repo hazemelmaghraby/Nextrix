@@ -161,14 +161,14 @@ const AccountProfile = () => {
                 </div>
 
                 {/* BIO */}
-                {bio && (
+                {info.bio && (
                     <motion.p
                         className="text-gray-300 leading-relaxed mb-8 text-center md:text-left"
                         variants={fadeIn}
                         initial="hidden"
                         animate="visible"
                     >
-                        {bio}
+                        {info.bio}
                     </motion.p>
                 )}
 

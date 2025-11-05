@@ -4,7 +4,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LMSNavbar from "../Navigation/LMSNavigationBar";
 import LMSFooter from "../Footer/LMSFooter";
-import LMSLogo from '/LMS.png'
 
 gsap.registerPlugin(ScrollTrigger);
 

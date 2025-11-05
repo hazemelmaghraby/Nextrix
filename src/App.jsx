@@ -39,6 +39,7 @@ import SessionCodesMarketplace from './components/Marketplace/SessionsCodes/Sess
 import Courses from './components/LMS/Courses/Courses';
 import LMSHome from './components/LMS/Home/LMSHome';
 import LMSLayout from './components/LMS/Layout/LMSLayout';
+import Checkout from './components/Marketplace/Checkout/Checkout';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -108,6 +109,7 @@ function App() {
         <Route path='/marketplace/books' element={<Books />} />
         <Route path='/marketplace/sessionCodes' element={<SessionCodesMarketplace />} />
         <Route path='/cart' element={<Cart />} />
+        <Route path='/checkout' element={<Checkout />} />
       </Route>
 
       <Route path='/lms' element={<LMSLayout />}>

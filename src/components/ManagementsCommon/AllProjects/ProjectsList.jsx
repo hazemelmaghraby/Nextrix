@@ -323,7 +323,12 @@ const ProjectsList = () => {
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div>
                                             <span className="text-gray-500">Client:</span>
-                                            <p className="text-white">{project.clientName || "Unknown"}</p>
+                                            <Link
+                                                to={`/accs/${project.clientUID}`}
+                                                className="text-green-400 hover:underline block"
+                                            >
+                                                {project.clientName}
+                                            </Link>
                                         </div>
                                         <div>
                                             <span className="text-gray-500">Business Type:</span>
@@ -359,7 +364,12 @@ const ProjectsList = () => {
                                         </div>
                                         <div>
                                             <span className="text-gray-500">Accepted By:</span>
-                                            <p className="text-white">{project.acceptedByName || "Unknown"}</p>
+                                            <Link
+                                                to={`/accs/${project.acceptedByInUID}`}
+                                                className="text-red-400 hover:underline block"
+                                            >
+                                                {project.acceptedByName}
+                                            </Link>
                                         </div>
                                         <div>
                                             <span className="text-gray-500">Accepted At:</span>

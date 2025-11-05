@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router';
 import { loadCart, loadCartFromFirestore } from '../../constants/Redux/items/itemsSlice';
+import LMSLogo from '/LMS.png'
 
 
 const Navbar = () => {
@@ -557,14 +558,6 @@ const Navbar = () => {
                                                     </a>
 
                                                     <a
-                                                        href="/Sessions"
-                                                        className="flex items-center space-x-3 px-4 py-3 text-gray-200 hover:bg-white/10 hover:text-amber-400 transition-all duration-200 group"
-                                                    >
-                                                        <BookCopy className="w-4 h-4 text-zinc-300 group-hover:text-lime-400 transition-colors" />
-                                                        <span className="text-sm font-medium">Sessions</span>
-                                                    </a>
-
-                                                    <a
                                                         href="#"
                                                         onClick={e => {
                                                             e.preventDefault();
@@ -628,7 +621,17 @@ const Navbar = () => {
                                                         <span className="text-sm font-medium">Become Certified</span>
                                                     </a>
 
-                                                    <div className="border-t border-white/10 my-1"></div>
+                                                    <div className="border-t border-white/10 my-5"></div>
+
+                                                    <a
+                                                        href="/lms"
+                                                        className="flex items-center border border-blue-500 rounded-2xl space-x-3 hover:bg-cyan-600 hover:text-black px-4 py-3 text-gray-200 transition-all duration-200 group"
+                                                    >
+                                                        <img src={LMSLogo} className="w-8 h-8 text-zinc-300 group-hover:text-lime-400 transition-colors" />
+                                                        <span className="text-sm font-medium">LMS</span>
+                                                    </a>
+
+                                                    <div className="border-t border-white/10 my-5"></div>
 
                                                     <button
                                                         onClick={handleSignOut}

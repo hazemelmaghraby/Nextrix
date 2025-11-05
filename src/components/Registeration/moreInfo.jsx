@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../constants/firebase";
 import useUserData from "../../constants/data/useUserData";
-import NotSignedIn from '../../constants/components/NotSignedIn';
+import NotSignedIn from "../../constants/components/NotSignedIn";
 import Loading from "../../constants/components/Loading";
-import { Github, Linkedin, Instagram, Phone, Check } from "lucide-react";
+import { Github, Linkedin, Instagram, Phone, Check, Upload } from "lucide-react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 
@@ -23,12 +23,18 @@ export default function MoreInfoForm() {
     const [linkedin, setLinkedin] = useState("");
     const [instagram, setInstagram] = useState("");
     const [whatsApp, setWhatsApp] = useState("");
-    const { user, uid, loading, configDonee } = useUserData();
+    const { user, uid, loading, configDonee, avatar: userAvatar } = useUserData();
+
+    const [avatar, setAvatar] = useState(userAvatar || null);
+    const [preview, setPreview] = useState(userAvatar || null);
+    const [uploading, setUploading] = useState(false);
 
     const titleRef = useRef();
     const subtitleRef = useRef();
+    const navigate = useNavigate();
+
     React.useEffect(() => {
-        document.title = 'Nextrix • subInfo';
+        document.title = "Nextrix • subInfo";
     }, []);
 
     useEffect(() => {
@@ -45,94 +51,112 @@ export default function MoreInfoForm() {
         );
     }, []);
 
-    const navigate = useNavigate();
-
-    if (loading) {
-        <Loading />
-    }
+    if (loading) return <Loading />;
 
     if (configDonee && !loading) {
-
-
         return (
-            <>
-                <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-                    {/* Background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-black via-green-500/10 to-black" />
+            <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-black via-green-500/10 to-black" />
+                <div className="absolute top-20 left-20 w-72 h-72 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
 
-                    {/* Glow effects */}
-                    <div className="absolute top-20 left-20 w-72 h-72 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-
-                    {/* Content */}
-                    <div className="relative z-10 text-center px-6 max-w-3xl">
-                        <div className="inline-flex items-center justify-center p-6 rounded-full border border-green-500/30 bg-black/40 backdrop-blur-lg shadow-lg mb-6">
-                            <Check className="w-12 h-12 text-green-500" />
-                        </div>
-                        <h1
-                            ref={titleRef}
-                            className="text-5xl py-3.5 md:text-7xl font-bold bg-gradient-to-r from-green-500 via-orange-500 to-white bg-clip-text text-transparent mb-4"
-                        >
-                            Profile Info is complete
-                        </h1>
-                        <p
-                            ref={subtitleRef}
-                            className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8"
-                        >
-                            Your profile information is complete. You can now proceed to start using all the features of our platform. If you wish to update your profile details in the future, you can do so from your account settings.
-                        </p>
-                        <button
-                            onClick={() => navigate("/")}
-                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
-                        >
-                            Home
-                        </button>
+                <div className="relative z-10 text-center px-6 max-w-3xl">
+                    <div className="inline-flex items-center justify-center p-6 rounded-full border border-green-500/30 bg-black/40 backdrop-blur-lg shadow-lg mb-6">
+                        <Check className="w-12 h-12 text-green-500" />
                     </div>
-                </section>
-            </>
-        )
+                    <h1
+                        ref={titleRef}
+                        className="text-5xl py-3.5 md:text-7xl font-bold bg-gradient-to-r from-green-500 via-orange-500 to-white bg-clip-text text-transparent mb-4"
+                    >
+                        Profile Info is complete
+                    </h1>
+                    <p
+                        ref={subtitleRef}
+                        className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8"
+                    >
+                        Your profile information is complete. You can now proceed to start using all features of our platform.
+                    </p>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
+                    >
+                        Home
+                    </button>
+                </div>
+            </section>
+        );
     }
-
 
     if (!user && !loading) {
         return (
             <NotSignedIn>
-                you must be signed in to complete setting up your profile.
+                You must be signed in to complete setting up your profile.
             </NotSignedIn>
         );
     }
 
+    // ✅ Upload avatar to ImageBB (not Firebase Storage)
+    const handleAvatarSave = async () => {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return alert("Please sign in first.");
+        if (!avatar) return alert("Please select an image first.");
+
+        try {
+            setUploading(true);
+
+            const formData = new FormData();
+            formData.append("image", avatar);
+
+            // Replace with your ImageBB API key:
+            const apiKey = "31fd65f85db081f73371a67dd8e2042e";
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            if (!data.success) throw new Error("Failed to upload image to ImageBB");
+
+            const imageUrl = data.data.url;
+            setPreview(imageUrl);
+
+            await setDoc(
+                doc(db, "users", currentUser.uid),
+                { avatarURL: imageUrl },
+                { merge: true }
+            );
+
+            alert("Avatar uploaded successfully!");
+        } catch (err) {
+            console.error("Error saving avatar:", err);
+            alert("Error uploading avatar.");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setAvatar(file);
+        const previewUrl = URL.createObjectURL(file);
+        setPreview(previewUrl);
+    };
+
+    // 🔥 Existing profile saving (unchanged)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const user = auth.currentUser;
-        if (!user) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return alert("You must be signed in.");
 
-            return (
-                <>
-                    <NotSignedIn>
-                        you must be signed in to complete setting up your profile.
-                    </NotSignedIn>
-                </>
-            )
-        }
-
-        // ✅ validations
-        if (!title.trim()) {
-            alert("Job Title is required.");
-            return;
-        }
-        if (!level.trim()) {
-            alert("Level is required.");
-            return;
-        }
-        if (!bio.trim() || bio.length < 10) {
-            alert("Bio must be at least 10 characters.");
-            return;
-        }
+        if (!title.trim()) return alert("Job Title is required.");
+        if (!level.trim()) return alert("Level is required.");
+        if (!bio.trim() || bio.length < 10)
+            return alert("Bio must be at least 10 characters.");
 
         try {
             await setDoc(
-                doc(db, "users", user.uid),
+                doc(db, "users", currentUser.uid),
                 {
                     profileInfo: {
                         careerRoles,
@@ -155,7 +179,6 @@ export default function MoreInfoForm() {
                 },
                 { merge: true }
             );
-
             alert("Extra info saved!");
         } catch (err) {
             console.error("Error saving extra info:", err);
@@ -163,28 +186,58 @@ export default function MoreInfoForm() {
         }
     };
 
-    // handle dropdown multi select
-    const handleCareerChange = (e) => {
-        const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
-        setCareerRoles(selected);
-    };
-
-    const handleSubRolesChange = (e) => {
-        const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
-        setSubRoles(selected);
-    };
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-6 mt-15">
             <form
                 onSubmit={handleSubmit}
-                className="w-full bg-black/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/10 p-8 space-y-6"
+                className="w-full max-w-3xl bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8 space-y-6"
             >
                 <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-orange-400 to-blue-400 bg-clip-text text-transparent">
                     Complete Your Profile
                 </h2>
 
-                {/* Grid for general fields */}
+                {/* Avatar Upload */}
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="relative group">
+                        {preview ? (
+                            <img
+                                src={preview}
+                                alt="Avatar Preview"
+                                className="w-32 h-32 rounded-full border-4 border-blue-500/40 object-cover shadow-lg transition-transform duration-300 group-hover:scale-105"
+                            />
+                        ) : (
+                            <div className="w-32 h-32 rounded-full bg-black/40 border-4 border-dashed border-blue-500/30 flex items-center justify-center text-gray-500 text-3xl group-hover:border-blue-400 transition-all">
+                                ?
+                            </div>
+                        )}
+
+                        <label className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 p-2 rounded-full cursor-pointer shadow-md transition">
+                            <Upload className="w-4 h-4 text-white" />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="hidden"
+                            />
+                        </label>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={handleAvatarSave}
+                        disabled={uploading}
+                        className={`px-5 py-2.5 rounded-lg text-white font-semibold transition-all ${uploading
+                            ? "bg-gray-600 cursor-not-allowed"
+                            : "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-indigo-600 hover:to-blue-600 shadow-md hover:shadow-lg hover:shadow-blue-500/30"
+                            }`}
+                    >
+                        {uploading ? "Uploading..." : "Save Avatar"}
+                    </button>
+
+                    <p className="text-xs text-gray-400 mt-1 text-center">
+                        Upload your profile picture (JPG, PNG, or GIF)
+                    </p>
+                </div>
                 <div className="grid md:grid-cols-2 gap-6">
                     {/* Job Title */}
                     <div>
@@ -628,13 +681,8 @@ export default function MoreInfoForm() {
                     </div>
                 </div>
 
-                {/* Avatar - Coming Soon */}
-                <div className="opacity-50 pointer-events-none">
-                    <label className="block text-gray-300 mb-2">Avatar (Coming Soon)</label>
-                    <div className="w-full px-4 py-3 rounded-lg bg-black/40 border border-dashed border-white/20 text-gray-400 text-center">
-                        Avatar upload feature is coming soon...
-                    </div>
-                </div>
+                {/* Avatar Upload */}
+
 
                 {/* Submit */}
                 <button

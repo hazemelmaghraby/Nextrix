@@ -5,6 +5,7 @@ import LMSLogo from '/LMS.png';
 import useUserData from "../../../constants/data/useUserData";
 
 const LMSNavbar = () => {
+    const { user, username, firsName, surName, role, owner, lms } = useUserData();
     return (
         <nav className="fixed top-0 left-0 w-full bg-zinc-950/70 backdrop-blur-md border-b border-blue-900/40 z-50 px-10 py-1 flex justify-between items-center min-h-[5rem]">
             <Link
