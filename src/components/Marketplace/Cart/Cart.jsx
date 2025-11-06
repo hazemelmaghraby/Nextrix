@@ -218,7 +218,7 @@ const Cart = () => {
                         Add some awesome items to your cart to see them here.
                     </p>
                     <button
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/marketplace")}
                         className="px-6 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-md hover:opacity-90 transition"
                     >
                         Browse Marketplace

@@ -19,11 +19,12 @@ const Navbar = () => {
     const { firstName, surName, username, role, gender, phone, owner, premium, uid, avatar } = useUserData();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false); //Account Dropdown
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [projectsMenuIsOpen, setProjectsMenuIsOpen] = useState()
+    const [logoutModal, setLogoutModal] = useState(false);
     const dropdownRef = useRef();
     const items = useSelector(state => state.itemsReducer.items);
 
@@ -148,6 +149,9 @@ const Navbar = () => {
         }
     }
 
+    const handleLogoutBtn = () => {
+        setLogoutModal(true);
+    }
 
     return (
         <>
@@ -634,7 +638,10 @@ const Navbar = () => {
                                                     <div className="border-t border-white/10 my-5"></div>
 
                                                     <button
-                                                        onClick={handleSignOut}
+                                                        onClick={() => {
+                                                            handleLogoutBtn();  // runs your logout logic
+                                                            setOpen(false);
+                                                        }}
                                                         className="w-full text-left flex items-center hover:cursor-pointer space-x-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group"
                                                     >
                                                         <LogOut className="w-4 h-4 group-hover:text-red-300 transition-colors" />
@@ -644,8 +651,8 @@ const Navbar = () => {
                                             </div>
                                         )}
                                     </div>
-
                                 </>
+
                             )}
                             {!username && (
                                 <>
@@ -685,6 +692,41 @@ const Navbar = () => {
                         </div>
                     )}
                 </nav>
+                {logoutModal && (
+                    <>
+                        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+                            <div className="bg-[#0a0a0f] border border-[#1f1f2e] rounded-2xl shadow-xl w-full max-w-md p-6 relative text-white">
+                                <h3 className="text-xl font-semibold mb-4 text-orange-400">Logout</h3>
+                                <div className="mb-4">
+                                    <p className="text-gray-300 font-medium">
+                                        Are you sure you want to log out of your account?
+                                    </p>
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button
+                                        type="button"
+                                        className="px-4 py-2 bg-[#1a1a28] hover:bg-[#222233] text-gray-200 rounded-lg font-semibold border border-[#2b2b3c]"
+                                        onClick={() => {
+                                            setLogoutModal(false);
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-lg font-semibold"
+                                        onClick={() => {
+                                            handleSignOut()
+                                            setLogoutModal(false);
+                                        }}
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </header >
         </>
     )
