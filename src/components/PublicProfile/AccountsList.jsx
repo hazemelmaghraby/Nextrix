@@ -7,6 +7,7 @@ import DefaultPng from '/man.png'
 import useUserData from "../../constants/data/useUserData";
 import NotSignedIn from "../../constants/components/NotSignedIn";
 import Loading from "../../constants/components/Loading";
+import { BadgeCheck } from "lucide-react";
 
 const AccountsList = () => {
     const [users, setUsers] = useState([]);
@@ -59,7 +60,8 @@ const AccountsList = () => {
                                     if (u.role === 'admin') return 1;
                                     if (u.role === 'moderator') return 2;
                                     if (u.premium) return 3; //premuim boolean
-                                    return 4; // normal user
+                                    if (u.certified) return 4;
+                                    return 5; // normal user
                                 };
                                 return priority(a) - priority(b);
                             })
@@ -75,7 +77,7 @@ const AccountsList = () => {
                                                     : 'border-white/10 shadow-lg hover:border-blue-500/40 hover:shadow-blue-500/20 transition-all duration-300'} rounded-2xl p-5`}
                                 >
                                     {/* Badge for special roles */}
-                                    {(u.owner || u.role === 'admin' || u.role === 'moderator' || u.premium) && (
+                                    {(u.owner || u.role === 'admin' || u.role === 'moderator' || u.premium || u.certified) && (
                                         <div
                                             className={`absolute top-3 right-3 z-20 px-3 py-1 rounded-full text-xs font-bold tracking-wider shadow-md ${u.owner
                                                 ? 'bg-transparent border-1 border-amber-500'
@@ -83,10 +85,14 @@ const AccountsList = () => {
                                                     ? 'bg-transparent text-white border-1 border-red-600'
                                                     : u.role === 'moderator' ? 'bg-transparent text-white border-1 border-purple-700'
                                                         : u.premium ? 'bg-transparent  text-white border-1 border-yellow-100'
-                                                            : ''
+                                                            : u.certified ? 'bg-transparent text-white border-1 border-cyan-500'
+                                                                : ''
                                                 }`}
                                         >
-                                            {u.owner ? 'Owner' : u.role == 'admin' || u.role == 'moderator' ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : u.premium ? 'Premium' : '.'}
+                                            {u.owner ? 'Owner'
+                                                : u.role == 'admin' || u.role == 'moderator' ? u.role.charAt(0).toUpperCase() + u.role.slice(1)
+                                                    : u.premium ? 'Premium'
+                                                        : u.certified ? 'Certified' : '#'}
                                         </div>
                                     )}
 
@@ -211,7 +217,10 @@ const AccountsList = () => {
 
                                     {/* Name & Role */}
                                     <h3 className="text-xl font-semibold text-center relative z-10">
-                                        {u.firstName || u.name || "Unnamed User"} {u.surName}
+                                        <span className="inline-flex items-center justify-center gap-1">
+                                            {u.firstName || u.name || "Unnamed User"} {u.surName}
+                                            {u.certified && !u.owner && u.role !== 'admin' && <BadgeCheck className="w-5 inline-block ml-1 text-cyan-400" />}
+                                        </span>
                                     </h3>
 
                                     <p className={`text-center font-bold 
