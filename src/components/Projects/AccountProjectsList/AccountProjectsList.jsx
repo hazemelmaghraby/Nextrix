@@ -135,9 +135,12 @@ const AccountProjectsList = () => {
                             className="bg-gray-900/70 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-6 text-white hover:border-blue-500/40 transition"
                             whileHover={{ scale: 1.02 }}
                         >
-                            <h3 className="text-xl font-semibold text-blue-400 mb-2">
+                            <a
+                                href={`/myProjects/${project.id}`}
+                                className="text-xl font-semibold text-blue-400 mb-2 hover:underline cursor-pointer block"
+                            >
                                 {project.name}
-                            </h3>
+                            </a>
                             <p className="text-sm text-gray-400 mb-4 italic">
                                 Type: {project.type} | Status:{" "}
                                 <span

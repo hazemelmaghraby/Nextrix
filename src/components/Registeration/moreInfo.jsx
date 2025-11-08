@@ -7,6 +7,7 @@ import Loading from "../../constants/components/Loading";
 import { Github, Linkedin, Instagram, Phone, Check, Upload } from "lucide-react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function MoreInfoForm() {
     const [role, setRole] = useState("");
@@ -98,8 +99,34 @@ export default function MoreInfoForm() {
     // ✅ Upload avatar to ImageBB (not Firebase Storage)
     const handleAvatarSave = async () => {
         const currentUser = auth.currentUser;
-        if (!currentUser) return alert("Please sign in first.");
-        if (!avatar) return alert("Please select an image first.");
+        if (!currentUser) {
+            toast.error("Please sign in first.", {
+                position: "top-center",
+                autoClose: 4000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
+            return;
+        }
+        if (!avatar) {
+            toast.error("Please select an image first.", {
+                position: "top-center",
+                autoClose: 4000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
+            return;
+        }
 
         try {
             setUploading(true);
@@ -126,10 +153,30 @@ export default function MoreInfoForm() {
                 { merge: true }
             );
 
-            alert("Avatar uploaded successfully!");
+            toast.success("Avatar uploaded successfully!", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#23272f", color: "#fff" }
+            });
         } catch (err) {
             console.error("Error saving avatar:", err);
-            alert("Error uploading avatar.");
+            toast.error("Error uploading avatar.", {
+                position: "bottom-center",
+                autoClose: 5500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
         } finally {
             setUploading(false);
         }
@@ -147,12 +194,61 @@ export default function MoreInfoForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const currentUser = auth.currentUser;
-        if (!currentUser) return alert("You must be signed in.");
+        if (!currentUser) {
+            toast.error("You must be signed in.", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
+            return;
+        }
 
-        if (!title.trim()) return alert("Job Title is required.");
-        if (!level.trim()) return alert("Level is required.");
-        if (!bio.trim() || bio.length < 10)
-            return alert("Bio must be at least 10 characters.");
+        if (!title.trim()) {
+            toast.error("Job Title is required.", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
+            return;
+        }
+
+        if (!level.trim()) {
+            toast.error("Level is required.", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
+            return;
+        }
+
+        if (!bio.trim() || bio.length < 10) {
+            toast.error("Bio must be at least 10 characters.", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
+            return;
+        }
 
         try {
             await setDoc(
@@ -179,10 +275,28 @@ export default function MoreInfoForm() {
                 },
                 { merge: true }
             );
-            alert("Extra info saved!");
+            toast.success("Extra info saved!", {
+                position: "bottom-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#23272f", color: "#fff" }
+            });
         } catch (err) {
             console.error("Error saving extra info:", err);
-            alert("Error saving info.");
+            toast.error("Error saving info.", {
+                position: "bottom-center",
+                autoClose: 5500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
         }
     };
 

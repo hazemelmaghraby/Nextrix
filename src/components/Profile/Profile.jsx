@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// Profile.jsx
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
     Mail,
     Phone,
@@ -8,27 +10,31 @@ import {
     Crown,
     UserStar,
     Linkedin,
-    LinkedinIcon,
     Instagram,
     Github,
     BadgeCheck,
+    Users,
+    FolderKanban,
+    Settings as SettingsIcon
 } from "lucide-react";
 import useUserData from "../../constants/data/useUserData";
 import Loading from "../../constants/components/Loading";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../constants/firebase";
+import { Riple } from "react-loading-indicators";
 
-// Role color classes matching Navbar.jsx
+// (paste your existing roleStyles object here — kept same as your original)
 const roleStyles = {
     owner: {
-        // Yellow border and shadow, yellow badge, yellow text
         frame: "border-2 border-yellow-500 shadow-[0_0_0_3px_rgba(253,224,71,0.3)]",
         badge: "bg-yellow-400/20 border border-yellow-400 text-yellow-200 uppercase tracking-wider animate-pulse",
         border: "border-yellow-500 shadow-[0_0_0_3px_rgba(253,224,71,0.3)]",
         name: "text-yellow-300",
         username: "text-yellow-200",
-        roleBg: "bg-gradient-to-r from-yellow-400/30 via-orange-500/30 to-blue-500/30 border border-yellow-400/50 shadow shadow-yellow-400/10",
+        roleBg:
+            "bg-gradient-to-r from-yellow-400/30 via-orange-500/30 to-blue-500/30 border border-yellow-400/50 shadow shadow-yellow-400/10",
     },
     admin: {
-        // Red border and shadow, red badge, blue text
         frame: "border-2 border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]",
         badge: "bg-red-500/20 border border-red-500 text-blue-200 uppercase tracking-wider animate-pulse",
         border: "border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.3)]",
@@ -37,7 +43,6 @@ const roleStyles = {
         roleBg: "bg-gradient-to-r from-blue-400/30 to-blue-500/30 border border-blue-400/50",
     },
     moderator: {
-        // Purple border and shadow, purple badge, purple text
         frame: "border-2 border-purple-500 shadow-[0_0_0_3px_rgba(168,85,247,0.3)]",
         badge: "bg-purple-400/20 border border-purple-400 text-purple-200 uppercase tracking-wider animate-pulse",
         border: "border-purple-500 shadow-[0_0_0_3px_rgba(168,85,247,0.3)]",
@@ -46,7 +51,6 @@ const roleStyles = {
         roleBg: "bg-gradient-to-r from-purple-400/30 to-purple-500/30 border border-purple-400/50",
     },
     staff: {
-        // Green border and shadow, green badge, green text
         frame: "border-2 border-green-500 shadow-[0_0_0_3px_rgba(34,197,94,0.3)]",
         badge: "bg-green-400/20 border border-green-400 text-green-200 uppercase tracking-wider animate-pulse",
         border: "border-green-500 shadow-[0_0_0_3px_rgba(34,197,94,0.3)]",
@@ -55,7 +59,6 @@ const roleStyles = {
         roleBg: "bg-gradient-to-r from-green-400/30 to-green-500/30 border border-green-400/50",
     },
     premium: {
-        // Orange border and shadow, orange badge, orange text
         frame: "border-2 border-orange-500 shadow-[0_0_0_3px_rgba(234,179,8,0.3)]",
         badge: "bg-orange-400/20 border border-orange-400 text-orange-200 uppercase tracking-wider animate-pulse",
         border: "border-orange-500 shadow-[0_0_0_3px_rgba(234,179,8,0.3)]",
@@ -64,9 +67,7 @@ const roleStyles = {
         roleBg: "bg-gradient-to-r from-orange-400/30 to-orange-500/30 border border-orange-400/50",
     },
     certified: {
-        // Cyan border and shadow, cyan badge, cyan text
         frame: "border-2 border-cyan-400 shadow-[0_0_0_3px_rgba(34,211,238,0.3)]",
-        // badge: "bg-cyan-400/20 border border-cyan-400 text-cyan-200 uppercase tracking-wider animate-pulse",
         border: "border-cyan-400 shadow-[0_0_0_3px_rgba(34,211,238,0.3)]",
         name: "text-cyan-300",
         username: "text-cyan-200",
@@ -82,12 +83,7 @@ const roleStyles = {
     },
 };
 
-/*
-
-*/
-
 function getRoleKey({ owner, role, premium, certified }) {
-    // Certified takes precedence for styling
     if (certified && !owner && role === "admin" && role === "moderator" && role === "staff") return "certified";
     if (owner) return "owner";
     if (role && typeof role === "string") {
@@ -102,6 +98,7 @@ function getRoleKey({ owner, role, premium, certified }) {
 
 const Profile = () => {
     const {
+        user,
         phone,
         gender,
         firstName,
@@ -114,7 +111,6 @@ const Profile = () => {
         subRoles,
         careerRoles,
         age,
-        user,
         loading,
         avatar,
         github,
@@ -124,35 +120,125 @@ const Profile = () => {
         bio,
         title,
         certified,
+        major,
+        teamId,
+        uid,
+        projectsAssociatedd
     } = useUserData();
 
-    React.useEffect(() => {
-        document.title = 'Nextrix • Profile';
+
+    // Team + projects
+    const [teamData, setTeamData] = useState(null);
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [teamLoading, setTeamLoading] = useState(true);
+
+    const [projectsLoading, setProjectsLoading] = useState(false);
+    // This will hold the fetched project objects
+    const [projectsData, setProjectsData] = useState([]); // Default to [] instead of null
+
+    useEffect(() => {
+        const fetchTeam = async () => {
+            setTeamLoading(true);
+            try {
+                // 🧱 2. Fetch team (if exists)
+                if (teamId) {
+                    const teamRef = doc(db, "teams", teamId);
+                    const teamSnap = await getDoc(teamRef);
+
+                    if (teamSnap.exists()) {
+                        const teamInfo = teamSnap.data();
+                        setTeamData(teamInfo);
+
+                        // 👥 3. Fetch all team members
+                        if (Array.isArray(teamInfo.teamMembersUIDs) && teamInfo.teamMembersUIDs.length > 0) {
+                            const members = await Promise.all(
+                                teamInfo.teamMembersUIDs.map(async (memberUID) => {
+                                    const memberRef = doc(db, "users", memberUID);
+                                    const memberSnap = await getDoc(memberRef);
+                                    return memberSnap.exists()
+                                        ? { id: memberUID, ...memberSnap.data() }
+                                        : null;
+                                })
+                            );
+
+                            setTeamMembers(members.filter(Boolean));
+                        } else {
+                            setTeamMembers([]);
+                        }
+                    } else {
+                        setTeamData(null);
+                        setTeamMembers([]);
+                    }
+                } else {
+                    setTeamData(null);
+                    setTeamMembers([]);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setTeamData(null);
+                setTeamMembers([]);
+            } finally {
+                setTeamLoading(false);
+            }
+        };
+
+        if (uid) fetchTeam();
+    }, [uid, teamId]);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            if (!user && !loading) return;
+            setProjectsLoading(true);
+            try {
+                if (projectsAssociatedd && Array.isArray(projectsAssociatedd) && projectsAssociatedd.length > 0) {
+                    // Fetch all project docs listed in projectsAssociatedd
+                    const projectDocs = await Promise.all(
+                        projectsAssociatedd.map(async (projectsAssociatedd) => {
+                            const projectRef = doc(db, 'stock', 'projects', 'accepted projects', projectsAssociatedd);
+                            const projectSnap = await getDoc(projectRef);
+                            return projectSnap.exists() ? { id: projectsAssociatedd, ...projectSnap.data() } : null;
+                        })
+                    );
+                    // Filter out nulls where docs didn't exist
+                    setProjectsData(projectDocs.filter(Boolean));
+                } else if (typeof projectsAssociatedd === "string") {
+                    // Single project id
+                    const projectRef = doc(db, "projects", projectsAssociatedd);
+                    const projectSnap = await getDoc(projectRef);
+                    if (projectSnap.exists()) {
+                        setProjectsData([{ id: projectsAssociatedd, ...projectSnap.data() }]);
+                    } else {
+                        setProjectsData([]);
+                    }
+                } else {
+                    setProjectsData([]);
+                }
+
+            } catch (error) {
+                setProjectsData([]);
+            } finally {
+                setProjectsLoading(false);
+            }
+
+        }
+        fetchProjects();
+    }, [projectsAssociatedd, user, loading]);
+
+
+    useEffect(() => {
+        document.title = "Nextrix • Profile";
     }, []);
 
-
-    // useEffect(() => {
-    //     if (user !== undefined) {
-    //         setLoading(false);
-    //     }
-    // }, [user]);
-
-    if (loading) {
-        return <Loading />;
-    }
+    if (loading) return <Loading />;
 
     if (!user) {
         return (
             <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-6">
                 <div className="inline-block p-8 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-xl text-center">
                     <p className="text-2xl md:text-3xl font-bold text-white mb-4">
-                        <span className="text-orange-500">Please</span> Login to view your
-                        profile
+                        <span className="text-orange-500">Please</span> Login to view your profile
                     </p>
-                    <a
-                        className="text-lg text-blue-400 hover:underline transition"
-                        href="/login"
-                    >
+                    <a className="text-lg text-blue-400 hover:underline transition" href="/login">
                         Login
                     </a>
                 </div>
@@ -160,7 +246,6 @@ const Profile = () => {
         );
     }
 
-    // Determine style based on role/owner/premium
     const roleKey = getRoleKey({ owner, role, premium, certified });
     const frameClass = roleStyles[roleKey]?.frame || roleStyles.default.frame;
     const badgeClass = roleStyles[roleKey]?.badge || roleStyles.default.badge;
@@ -169,255 +254,240 @@ const Profile = () => {
     const usernameClass = roleStyles[roleKey]?.username || roleStyles.default.username;
     const roleBgClass = roleStyles[roleKey]?.roleBg || roleStyles.default.roleBg;
 
-    // Role label and icon
-    let roleLabel = role;
-    let roleIcon = null;
-    if (certified && !owner) {
-        roleLabel = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-        roleIcon = null;
-    } else if (owner) {
-        roleLabel = "Owner";
-        roleIcon = <Shield className="w-4 h-4" />;
-    } else if (roleKey === "admin") {
-        roleLabel = "Admin";
-    } else if (roleKey === "moderator") {
-        roleLabel = "Moderator";
-    } else if (roleKey === "staff") {
-        roleLabel = "Staff";
-    } else if (premium) {
-        roleLabel = "Premium";
-        roleIcon = <Crown className="w-4 h-4" />;
-    } else {
-        roleLabel = role || "User";
-    }
+    const isGoldShimmer = roleKey === "owner" || roleKey === "admin";
+
+    // FIX: Use projectsData (array) not projects
+    const projects = Array.isArray(projectsData) ? projectsData : [];
 
     return (
-        <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden my-2">
-            {/* Animated BG Orbs */}
-            <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-orange-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
-
-            {/* Outer border based on role */}
-            <div
-                className={`relative w-full mt-20 p-[2px] mx-5 rounded-3xl ${frameClass}`}
-            >
-                {/* Glassmorphism inner card */}
-                <div className="bg-black/70 backdrop-blur-2xl rounded-3xl p-10 md:p-12 text-white space-y-8 shadow-[0_0_30px_rgba(0,0,0,0.3)]">
-                    {/* Header with profile pic */}
-                    <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-8 gap-6">
-                        <div className="flex items-center gap-4">
-                            {/* Profile Image */}
-                            <div
-                                className={`relative w-28 h-28 rounded-full overflow-hidden border-4 ${profileBorderClass}`}
-                            >
-                                <img
-                                    src={avatar || `https://ui-avatars.com/api/?name=${firstName}+${surName}&background=000000&color=ffffff`}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover"
-                                />
+        <div className="min-h-screen w-full bg-gradient-to-br from-black via-gray-900 to-black pt-20 md:pt-24">
+            <div className="w-full px-6 py-8 md:px-8 md:py-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                    {/* LEFT: profile card */}
+                    <div className="md:col-span-1 relative">
+                        {/* gold shimmer behind card for owners/admins only */}
+                        {isGoldShimmer && (
+                            <div className="absolute -inset-1 rounded-2xl overflow-hidden pointer-events-none z-0">
+                                <div className="gold-shimmer w-full h-full" />
                             </div>
+                        )}
 
-                            {/* Name + Username */}
-                            <div>
-                                <h1 className={`text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-500 ${nameClass === "text-white" ? "" : nameClass} flex items-center gap-2`}>
-                                    {firstName} {surName}
-                                    {owner && (
-                                        <>
-                                            <Crown className="text-yellow-400 mt-2" />
-                                        </>
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className={`relative z-10 bg-black/60 backdrop-blur-2xl rounded-2xl p-6 shadow-xl border ${frameClass}`}
+                        >
+                            <div className="flex flex-col items-center">
+                                <div className={`relative w-40 h-40 rounded-full overflow-hidden border-4 ${profileBorderClass}`}>
+                                    <img
+                                        src={avatar || `https://ui-avatars.com/api/?name=${firstName}+${surName}&background=000000&color=ffffff`}
+                                        alt="avatar"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${firstName}+${surName}&background=000000&color=ffffff`; }}
+                                    />
+                                </div>
+
+                                <div className="text-center mt-4">
+                                    <h1 className={`text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-blue-400 ${nameClass}`}>
+                                        {firstName} {surName}
+                                        {owner && <Crown className="inline-block ml-2 text-yellow-300" />}
+                                        {premium && !certified && <UserStar className="inline-block ml-1 text-yellow-300" />}
+                                        {certified && !owner && <BadgeCheck className="inline-block ml-1 text-cyan-300" />}
+                                    </h1>
+                                    <p className={`mt-1 ${usernameClass} ${usernameClass !== "text-gray-400" ? "font-semibold" : "text-gray-400"}`}>@{username}</p>
+                                    {title && <p className="text-sm text-orange-400 mt-2">{title}</p>}
+                                </div>
+
+                                <div className="mt-4 flex items-center gap-2">
+                                    <span className={`px-3 py-1 rounded-full text-xs flex items-center gap-2 ${badgeClass}`}>
+                                        {owner ? <Shield className="w-4 h-4" /> : roleKey === "admin" ? <Shield className="w-4 h-4" /> : null}
+                                        <span>{owner ? "Owner" : role || "User"}</span>
+                                    </span>
+                                    {premium && !certified && !["admin", "moderator", "staff"].includes(roleKey) && (
+                                        <span className="px-3 py-1 rounded-full text-xs bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center gap-1 animate-pulse">
+                                            <Crown className="w-4 h-4" />
+                                            <span>Premium</span>
+                                        </span>
                                     )}
-                                    {premium && !certified && (
-                                        <>
-                                            <UserStar className="text-yellow-400 mt-2" />
-                                        </>
-                                    )}
-                                    {certified && !owner && (
-                                        <>
-                                            <BadgeCheck className="text-cyan-400 mt-2" />
-                                        </>
-                                    )}
-                                </h1>
-                                <p className={`${usernameClass} ${usernameClass === "text-gray-400" ? "" : "font-semibold"}`}>@{username}</p>
-                                {title && (
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-lg font-semibold text-orange-400">{title}</span>
+                                </div>
+
+                                {/* team quick info */}
+                                {!teamLoading && teamData && (
+                                    <div className="mt-6 w-full text-left">
+                                        <h3 className="text-sm text-white/80 font-semibold flex items-center gap-2">
+                                            <Users className="w-4 h-4" /> Team
+                                        </h3>
+                                        <div className="mt-2 bg-white/5 p-3 rounded-lg border border-white/10">
+                                            <p className="font-semibold text-white">{teamData.teamName}</p>
+                                            <p className="text-xs text-gray-300 mt-1">
+                                                Members: {teamData.teamMembersUIDs?.length || 0}
+                                            </p>
+                                            <div className="flex mt-3 -space-x-2">
+                                                {teamMembers.map((m) => (
+                                                    <a
+                                                        key={m.id || m.uid}
+                                                        href={`/accs/${m.id || m.uid}`}
+                                                        className="block"
+                                                        title={`Go to ${m.firstName || "User"}'s profile`}
+                                                    >
+                                                    </a>
+                                                ))}
+                                            </div>
+                                            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {teamMembers.map((m) => (
+                                                    <a
+                                                        key={m.id || m.uid}
+                                                        href={`/accs/${m.id || m.uid}`}
+                                                        className={`flex items-center bg-gradient-to-r from-gray-800 via-black to-gray-900 border rounded-lg p-3 shadow-md hover:border-orange-400 hover:bg-black/70 transition border-transparent`}
+
+                                                        title={`Go to ${m.firstName || "User"}'s profile`}
+                                                    >
+                                                        <img
+                                                            src={
+                                                                m.avatarURL ||
+                                                                m.avatar ||
+                                                                `https://ui-avatars.com/api/?name=${m.firstName || "User"}&background=111827&color=fff`
+                                                            }
+                                                            alt={m.firstName}
+                                                            className="w-10 h-10 rounded-full mr-3 border border-gray-700 object-cover"
+                                                        />
+                                                        <div>
+                                                            <p className="font-semibold text-white">
+                                                                {(m.firstName || "User") + (m.surName ? ` ${m.surName}` : "")}
+                                                            </p>
+                                                            <p className="text-xs text-gray-400">
+                                                                @{m.username || "unknown"}
+                                                            </p>
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
-                            </div>
-                        </div>
-
-
-                        {/* Roles */}
-                        <div className="flex flex-col items-end gap-2">
-                            <span className={`px-4 py-1 rounded-full text-sm flex items-center gap-1 ${badgeClass}`}>
-                                {roleIcon}
-                                <span>{roleLabel}</span>
-                            </span>
-                            {/* Show premium badge if premium and not owner and not admin/mod/staff */}
-                            {premium && !certified && !owner && !["admin", "moderator", "staff"].includes(roleKey) && (
-                                <span className="px-3 py-1 rounded-full text-xs bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center space-x-1 animate-pulse">
-                                    <Crown className="w-4 h-4" />
-                                    <span>Premium</span>
-                                </span>
-                            )}
-                            {/* Show role background badge for owner/admin/mod/staff */}
-                            {certified && !owner && !["admin", "moderator", "staff"].includes(roleKey) && (
-                                <span className="px-3 py-1 rounded-full text-xs bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center space-x-1 animate-pulse">
-                                    <BadgeCheck className="w-4 h-4" />
-                                    <span>Certified</span>
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-
-                    {/* Bio Section */}
-                    {bio && (
-                        <div className="max-w-md mt-4 md:mt-0">
-                            <h3 className="text-lg font-semibold text-white/80 mb-1">Bio</h3>
-                            <p className="text-gray-300 whitespace-pre-line">{bio}</p>
-                        </div>
-                    )}
-
-                    {/* Contact Info */}
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="flex items-center space-x-3">
-                            <Mail className="w-5 h-5 text-blue-400" />
-                            <span className="text-gray-300">{email}</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <Phone className="w-5 h-5 text-green-400" />
-                            <span className="text-gray-300">{phone}</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <User className="w-5 h-5 text-purple-400" />
-                            <span className="text-gray-300">
-                                {gender}, {age} years
-                            </span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <BadgeCheck className="w-5 h-5 text-cyan-400" />
-                            <span className="text-gray-300">
-                                {certified ? "Certified Member" : "Standard Member"}
-                            </span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <Star className="w-5 h-5 text-yellow-400" />
-                            <span className="text-gray-300">
-                                {premium ? "Premium Member" : "Standard Member"}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="activityRoles">
-                        <h2 className="text-xl font-semibold mb-3 text-white/90 gap-2">
-                            Activity Roles
-                        </h2>
-                        {premium && (<>
-                            <div className="inline-flex items-center px-6 py-1 rounded-full border-2 bg-gradient-to-r mr-2 from-amber-500/30 to-amber-400/30 border-amber-400/50 shadow-lg">
-                                <span className="text-md font-bold capitalize text-amber-200 tracking-wide">
-                                    premium
-                                </span>
-                            </div>
-                        </>)}
-                        {certified && (
-                            <>
-                                <div className="inline-flex items-center px-6 py-1 rounded-full border-2 bg-gradient-to-r from-cyan-500/30 to-cyan-400/30 border-cyan-400/50 shadow-lg mt-2">
-                                    <span className="text-md font-bold capitalize text-cyan-200 tracking-wide">
-                                        certified
-                                    </span>
+                                <div className="mt-6 flex gap-2">
+                                    <a href={linkedin || "#"} target="_blank" rel="noreferrer" className="p-2 rounded-full bg-white/5 border border-white/10 hover:scale-110 transition">
+                                        <Linkedin className="w-5 h-5 text-blue-300" />
+                                    </a>
+                                    <a href={github || "#"} target="_blank" rel="noreferrer" className="p-2 rounded-full bg-white/5 border border-white/10 hover:scale-110 transition">
+                                        <Github className="w-5 h-5 text-white" />
+                                    </a>
+                                    <a href={instagram || "#"} target="_blank" rel="noreferrer" className="p-2 rounded-full bg-white/5 border border-white/10 hover:scale-110 transition">
+                                        <Instagram className="w-5 h-5 text-pink-400" />
+                                    </a>
                                 </div>
-                            </>
-                        )}
+                            </div>
+                        </motion.div>
                     </div>
 
-                    {/* Career Roles */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-3 text-white/90">
-                            Career Roles
-                        </h2>
-                        <div className="flex flex-wrap gap-3">
-                            {Array.isArray(careerRoles) ? (
-                                careerRoles.map((r, idx) => (
-                                    <span
-                                        key={idx}
-                                        className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-blue-500/20 border border-white/10 text-sm text-gray-200 hover:scale-105 transition"
-                                    >
-                                        {r}
-                                    </span>
-                                ))
-                            ) : (
-                                <span className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-blue-500/20 border border-white/10 text-sm text-gray-200">
-                                    {careerRoles}
-                                </span>
-                            )}
-                        </div>
-                    </div>
+                    {/* RIGHT: details */}
+                    <div className="md:col-span-2 space-y-6">
+                        {/* Professional Info */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="bg-black/60 backdrop-blur-2xl rounded-2xl p-6 shadow-lg border border-white/10">
+                            <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6"><SettingsIcon className="w-5 h-5" /> Professional Information</h2>
 
-                    {/* Sub Roles */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-3 text-white/90">
-                            Sub Roles
-                        </h2>
-                        <div className="flex flex-wrap gap-3">
-                            {Array.isArray(subRoles) ? (
-                                subRoles.map((r, idx) => (
-                                    <span
-                                        key={idx}
-                                        className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-white/10 transition"
-                                    >
-                                        {r}
-                                    </span>
-                                ))
-                            ) : (
-                                <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300">
-                                    {subRoles}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    {/* Social Media */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-3 text-white/90">
-                            Social Media
-                        </h2>
-                        <div className="flex gap-4">
-                            <a
-                                href={linkedin}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-3 rounded-full bg-white/5 border border-white/10 text-blue-400 hover:bg-blue-500/20 hover:scale-110 transition"
-                            >
-                                <Linkedin className="w-6 h-6" />
-                            </a>
-                            <a
-                                href={github}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-gray-500/20 hover:scale-110 transition"
-                            >
-                                <Github className="w-6 h-6" />
-                            </a>
-                            <a
-                                href={instagram}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-3 rounded-full bg-white/5 border border-white/10 text-pink-400 hover:bg-pink-500/20 hover:scale-110 transition"
-                            >
-                                <Instagram className="w-6 h-6" />
-                            </a>
-                            <a
-                                href={instagram}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-3 rounded-full bg-white/5 border border-white/10 text-green-400 hover:bg-green-500/20 hover:scale-110 transition"
-                            >
-                                <Phone className="w-6 h-6" />
-                            </a>
-                        </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Current Role</label>
+                                    <p className="text-white">{role || "N/A"}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Title</label>
+                                    <p className="text-white">{title || "-"}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Experience / Major</label>
+                                    <p className="text-white">{major || "-"}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Phone</label>
+                                    <p className="text-white">{phone || "-"}</p>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Personal Details */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="bg-black/60 backdrop-blur-2xl rounded-2xl p-6 shadow-lg border border-white/10">
+                            <h2 className="text-lg font-semibold text-white mb-4">Personal Details</h2>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Email</label>
+                                    <p className="text-white">{email}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Gender / Age</label>
+                                    <p className="text-white">{gender || "-"}{age ? `, ${age} years` : ""}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Member Status</label>
+                                    <p className="text-white">{certified ? "Certified Member" : "Standard Member"}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-300 mb-2">Membership Tier</label>
+                                    <p className="text-white">{premium ? "Premium" : "Free"}</p>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Career Roles / Subroles / Projects */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="bg-black/50 backdrop-blur-2xl rounded-2xl p-6 shadow-lg border border-white/8">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <h3 className="text-sm text-white/90 font-semibold mb-3">Career Roles</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {Array.isArray(careerRoles) && careerRoles.length ? careerRoles.map((r, i) => (
+                                            <span key={i} className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-gray-200">{r}</span>
+                                        )) : <p className="text-gray-300">-</p>}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-sm text-white/90 font-semibold mb-3">Sub Roles</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {Array.isArray(subRoles) && subRoles.length ? subRoles.map((r, i) => (
+                                            <span key={i} className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300">{r}</span>
+                                        )) : <p className="text-gray-300">-</p>}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-sm text-white/90 font-semibold mb-3">Projects</h3>
+                                    <div className="flex flex-col gap-2">
+                                        {projectsLoading ? (
+                                            <p className="text-gray-300">Loading...</p>
+                                        ) : projects && projects.length ? projects.map(p => (
+                                            <div key={p.id} className="p-2 rounded-lg bg-white/5 border border-white/8">
+                                                <a
+                                                    href={`/myProjects/${p.id}`}
+                                                    className="text-white text-sm font-semibold hover:underline"
+                                                >
+                                                    {p.projectName || p.name || "Untitled"}
+                                                </a>
+                                                {p.details && (
+                                                    <p className="text-gray-400 text-xs mt-1">
+                                                        {p.details.length > 50
+                                                            ? `${p.details.slice(0, 50)}...`
+                                                            : p.details}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )) : <p className="text-gray-300">No projects</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };

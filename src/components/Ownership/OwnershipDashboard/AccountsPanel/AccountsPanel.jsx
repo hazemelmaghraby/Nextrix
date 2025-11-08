@@ -10,7 +10,7 @@ import Archive from "../../../../../public/archive.png";
 
 export default function AccountsPanel() {
     const [users, setUsers] = useState([]);
-    const { user, username, owner, role, loading } = useUserData();
+    const { user, username, owner, role, loading, avatar } = useUserData();
     React.useEffect(() => {
         document.title = 'Users Management';
     }, []);
@@ -75,7 +75,7 @@ export default function AccountsPanel() {
                         {/* Avatar */}
                         <div className="flex justify-center">
                             <img
-                                src={useres.avatar || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNTcxMmQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1hcmNoaXZlLXgtaWNvbiBsdWNpZGUtYXJjaGl2ZS14Ij48cmVjdCB3aWR0aD0iMjAiIGhlaWdodD0iNSIgeD0iMiIgeT0iMyIgcng9IjEiLz48cGF0aCBkPSJNNCA4djExYTIgMiAwIDAgMCAyIDJoMTJhMiAyIDAgMCAwIDItMlY4Ii8+PHBhdGggZD0ibTkuNSAxNyA1LTUiLz48cGF0aCBkPSJtOS41IDEyIDUgNSIvPjwvc3ZnPg=="}
+                                src={useres.avatarURL || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNTcxMmQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1hcmNoaXZlLXgtaWNvbiBsdWNpZGUtYXJjaGl2ZS14Ij48cmVjdCB3aWR0aD0iMjAiIGhlaWdodD0iNSIgeD0iMiIgeT0iMyIgcng9IjEiLz48cGF0aCBkPSJNNCA4djExYTIgMiAwIDAgMCAyIDJoMTJhMiAyIDAgMCAwIDItMlY4Ii8+PHBhdGggZD0ibTkuNSAxNyA1LTUiLz48cGF0aCBkPSJtOS41IDEyIDUgNSIvPjwvc3ZnPg=="}
                                 alt={useres.firstName}
                                 className="w-24 h-24 rounded-full object-cover border-4 border-blue-500/40"
                             />

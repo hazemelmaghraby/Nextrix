@@ -12,11 +12,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router';
 import { loadCart, loadCartFromFirestore } from '../../constants/Redux/items/itemsSlice';
 import LMSLogo from '/LMS.png'
+import { toast } from 'react-toastify';
+import { BlinkBlur } from 'react-loading-indicators';
 
 
 const Navbar = () => {
     const dispatch = useDispatch();
-    const { firstName, surName, username, role, gender, phone, owner, premium, uid, avatar } = useUserData();
+    const { firstName, surName, username, role, gender, phone, owner, premium, uid, avatar, loading } = useUserData();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [open, setOpen] = useState(false); //Account Dropdown
@@ -143,14 +145,60 @@ const Navbar = () => {
     const handleSignOut = async () => {
         try {
             await signOut(auth);
-            alert("Logged Out Successfully !")
+            toast.success("Logged Out Successfully !", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#23272f", color: "#fff" }
+            });
         } catch (error) {
-            alert(`Error logging out - please try again later:\n ${error}`);
+            toast.error(`Error logging out - please try again later:\n ${error}`, {
+                position: "bottom-center",
+                autoClose: 7000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#2d0101", color: "#fff" }
+            });
         }
     }
 
     const handleLogoutBtn = () => {
         setLogoutModal(true);
+    }
+
+    if (loading) {
+        return (
+            <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm shadow-lg">
+                <nav className="container mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="header-item">
+                            <div className="flex items-center space-x-2">
+                                <div className="animate-pulse rounded-full bg-zinc-800 w-10 h-10" />
+                                <div className="h-8 w-24 rounded bg-zinc-800 animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="hidden md:flex space-x-8">
+                            {[...Array(5)].map((_, i) => (
+                                <div key={i} className="h-7 w-20 rounded-md bg-zinc-800 animate-pulse" />
+                            ))}
+                            <div className="h-9 w-9 rounded-full bg-zinc-800 animate-pulse" />
+                        </div>
+                        <div className="md:hidden header-item">
+                            <div className="w-8 h-8 bg-zinc-800 animate-pulse rounded-md" />
+                        </div>
+                    </div>
+                </nav>
+            </header>
+        )
     }
 
     return (
@@ -179,7 +227,7 @@ const Navbar = () => {
                                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
                                 </button>
                             ))}
-                            {username && (
+                            {username && !loading && (
                                 <>
                                     {/* <button onClick={handleSignOut} className="group bg-gradient-to-r from-red-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 flex items-center space-x-2 hover:cursor-pointer">
                                         Logout
@@ -639,8 +687,8 @@ const Navbar = () => {
 
                                                     <button
                                                         onClick={() => {
-                                                            handleLogoutBtn();  // runs your logout logic
-                                                            setOpen(false);
+                                                            handleLogoutBtn();  // runs the logout logic
+                                                            setOpen(false); // Close the navbar
                                                         }}
                                                         className="w-full text-left flex items-center hover:cursor-pointer space-x-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group"
                                                     >
@@ -654,7 +702,7 @@ const Navbar = () => {
                                 </>
 
                             )}
-                            {!username && (
+                            {!username && !loading && (
                                 <>
                                     <button onClick={() => window.location.href = '/login'} className="hgroup bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 flex items-center space-x-2 hover:cursor-pointer">
                                         Login

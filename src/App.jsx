@@ -40,6 +40,7 @@ import Courses from './components/LMS/Courses/Courses';
 import LMSHome from './components/LMS/Home/LMSHome';
 import LMSLayout from './components/LMS/Layout/LMSLayout';
 import Checkout from './components/Marketplace/Checkout/Checkout';
+import ProjectsDefaultPlate from './components/Projects/ProjectsDefaultPlate';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -99,6 +100,7 @@ function App() {
         <Route path='/userPortfolio' element={<Portfolio />} />
         <Route path='/accountSettings' element={<AccountSettings />} />
         <Route path='/myProjects' element={<AccountProjects />} />
+        <Route path='/myProjects/:projectId' element={<ProjectsDefaultPlate />} />
         <Route path='/adminDashboard' element={<AdminDashboard />} />
         <Route path='/projectsRequests' element={<ProjectsList />} />
         <Route path='/ourTeam' element={<OurTeam />} />

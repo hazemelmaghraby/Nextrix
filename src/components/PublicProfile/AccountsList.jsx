@@ -18,10 +18,14 @@ const AccountsList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             const querySnapshot = await getDocs(collection(db, "users"));
-            const userList = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+            const userList = querySnapshot.docs.map((doc) => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    profileInfo: data.profileInfo || {},
+                };
+            });
             setUsers(userList);
         };
 
@@ -132,69 +136,6 @@ const AccountsList = () => {
                                                     filter: "blur(6px)",
                                                 }}
                                             />
-
-                                            <style>
-                                                {`
-        @keyframes spreadGold {
-          0% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 0.3;
-          }
-          100% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-        }
-
-        @keyframes spreadRed {
-          0% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 0.3;
-          }
-          100% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-        }
-
-        @keyframes spreadPurple {
-          0% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 0.3;
-          }
-          100% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-        }
-        @keyframes moveCyanBar {
-          0% {
-            transform: translateY(100%);
-            opacity: 0.2;
-          }
-          50% {
-            opacity: 0.6;
-          }
-          100% {
-            transform: translateY(-100%);
-            opacity: 0.2;
-          }
-        }
-                                            </style>
-      `}
-                                            </style>
                                         </div>
                                     )}
 
@@ -228,25 +169,25 @@ const AccountsList = () => {
                                             : u.role === 'admin' ? 'text-bold text-red-200'
                                                 : 'text-gray-400'} 
                                                 text-sm relative z-10`}>
-                                        {u.profileInfo.title || "No title specified"}
+                                        {u.profileInfo?.title || "No title specified"}
                                     </p>
 
                                     {/* Level */}
-                                    {u.profileInfo.level && (
+                                    {u.profileInfo?.level && (
                                         <p className="text-center text-sm mt-1 text-blue-400 relative z-10">
-                                            Level: {u.profileInfo.level}
+                                            Level: {u.profileInfo?.level}
                                         </p>
                                     )}
 
                                     {/* Bio */}
-                                    {u.profileInfo.bio && (
+                                    {u.profileInfo?.bio && (
                                         <p className="text-gray-400 text-sm mt-3 text-center line-clamp-3 relative z-10">
-                                            {u.profileInfo.bio}
+                                            {u.profileInfo?.bio}
                                         </p>
                                     )}
 
                                     {/* Skills */}
-                                    {u.profileInfo.skills && Array.isArray(u.profileInfo.skills) && u.profileInfo.skills.length > 0 && (
+                                    {u.profileInfo?.skills && Array.isArray(u.profileInfo.skills) && u.profileInfo.skills.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mt-4 justify-center">
                                             {u.profileInfo.skills.slice(0, 4).map((skill, i) => (
                                                 <span

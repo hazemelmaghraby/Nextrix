@@ -29,6 +29,7 @@ export default function useUserData() {
     const [configDonee, setConfigDonee] = useState(false);
     const [userLevel, setUserLevel] = useState("");
     const [projectsAssociatedd, setProjectsAssociatedd] = useState([]);
+    const [teamId, setTeamId] = useState(null)
     // loading state
     const [loading, setLoading] = useState(true);
 
@@ -67,6 +68,7 @@ export default function useUserData() {
                         setConfigDonee(userData.profileInfo.configDone || false)
                         setUserLevel(userData.profileInfo.level || "Not Set")
                         setProjectsAssociatedd(userData.projectsAssociated || 'No Associated Projects.')
+                        setTeamId(userData.teamId || null)
 
                     }
                 } catch (error) {
@@ -93,6 +95,7 @@ export default function useUserData() {
                 setGithub(null);
                 setLinkedin(null);
                 setCertified(false)
+                setTeamId(null);
             }
 
             setLoading(false); // finished fetching
@@ -128,5 +131,6 @@ export default function useUserData() {
         configDonee,
         userLevel,
         projectsAssociatedd,
+        teamId,
     };
 }
