@@ -6,7 +6,9 @@ import { AlertTriangle } from "lucide-react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 import NotSignedIn from '../../constants/components/NotSignedIn';
-import missingPermissions from '../../constants/components/missingPermissions';
+import MissingPermissions from '../../constants/components/missingPermissions';
+import { toast, ToastContainer } from 'react-toastify';
+import Loading from '../../constants/components/Loading';
 
 
 const Announcements = () => {
@@ -15,12 +17,13 @@ const Announcements = () => {
     }, []);
 
     const [maintenance, setMaintenance] = useState(null);
-    const { user, owner, role, uid } = useUserData();
+    const { user, owner, role, uid, loading } = useUserData();
     const [notificationInfo, setNotificationInfo] = useState({
         title: '',
         description: '',
         timeStamp: ''
     });
+
 
 
     // const [permissionError, setPermissionError] = useState(false);
@@ -55,7 +58,17 @@ const Announcements = () => {
                 createdBy: uid,
             });
             setNotificationInfo({ title: "", description: "" });
-            alert("Announcement posted ✅");
+            toast.success("Announcement posted successfully ✅", {
+                position: "top-center",
+                autoClose: 4000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                style: { borderRadius: "10px", background: "#23272f", color: "#fff" }
+            });
         } catch (error) {
             console.error("Error sending maintenance notification:", error);
         }
@@ -70,7 +83,7 @@ const Announcements = () => {
         });
     };
 
-    if (!user) {
+    if (!user && !loading) {
         return (
             <NotSignedIn>
                 You must be signed in to identify your permissions.
@@ -78,12 +91,18 @@ const Announcements = () => {
         );
     }
 
+    if (loading) {
+        return (
+            <Loading />
+        )
+    }
+
     // --- Require owner
     if (!owner) {
         return (
-            <missingPermissions>
+            <MissingPermissions>
                 You do not have permission to access this page. Only owners can view or post announcements.
-            </missingPermissions>
+            </MissingPermissions>
         );
     }
 
@@ -122,6 +141,7 @@ const Announcements = () => {
                     </button>
                 </form>
             </div>
+            <ToastContainer />
         </div>
     );
 }

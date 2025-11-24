@@ -102,8 +102,8 @@ const Hero = () => {
                 </p>
 
                 <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <button className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:cursor-pointer text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 flex items-center space-x-2">
-                        <span>Get Started</span>
+                    <button onClick={() => { window.location.href = '/accs' }} className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:cursor-pointer text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 flex items-center space-x-2">
+                        <span>Our Specialists</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </button>
                     <button className="border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:cursor-pointer px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105">

@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router';
 import { loadCart, loadCartFromFirestore } from '../../constants/Redux/items/itemsSlice';
 import LMSLogo from '/LMS.png'
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { BlinkBlur } from 'react-loading-indicators';
 
 
@@ -725,8 +725,10 @@ const Navbar = () => {
 
                     {/* Mobile Menu */}
                     {isMenuOpen && (
-                        <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm">
-                            <div className="py-4">
+                        <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm z-40">
+                            <div className="py-4 space-y-1 flex flex-col items-stretch">
+
+                                {/* Mobile Nav Items */}
                                 {navItems.map((item) => (
                                     <button
                                         key={item.id}
@@ -736,6 +738,100 @@ const Navbar = () => {
                                         {item.name}
                                     </button>
                                 ))}
+
+                                {/* If logged in: user dropdown contents */}
+                                {username && !loading && (
+                                    <>
+                                        <div className="flex items-center gap-3 px-6 pt-4 pb-1">
+                                            <img
+                                                src={avatar || "https://ui-avatars.com/api/?name=User"}
+                                                alt="avatar"
+                                                className="w-10 h-10 rounded-full border-2 border-white/10"
+                                            />
+                                            <div>
+                                                <div className="text-white font-medium">{firstName} {surName}</div>
+                                                <div className="text-xs text-gray-400">{username}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="px-6 pt-3 space-y-1 flex flex-col">
+                                            {role === "admin" && (
+                                                <Link
+                                                    to="/admin"
+                                                    className="flex items-center space-x-3 py-3 hover:bg-orange-400/20 text-orange-400 hover:text-orange-300 transition-all duration-200 rounded-xl px-2"
+                                                >
+                                                    <Crown className="w-4 h-4" />
+                                                    <span className="text-sm font-medium">Admin Panel</span>
+                                                </Link>
+                                            )}
+                                            {(role === "moderator" || role === "staff") && (
+                                                <Link
+                                                    to="/staff"
+                                                    className="flex items-center space-x-3 py-3 hover:bg-purple-400/10 text-purple-400 hover:text-purple-300 transition-all duration-200 rounded-xl px-2"
+                                                >
+                                                    <BadgeCheck className="w-4 h-4" />
+                                                    <span className="text-sm font-medium">Moderator Panel</span>
+                                                </Link>
+                                            )}
+                                            {/* My Profile */}
+                                            <Link
+                                                to="/profile"
+                                                className="flex items-center space-x-3 py-3 hover:bg-zinc-700 text-gray-200 hover:text-white transition-all duration-200 rounded-xl px-2"
+                                            >
+                                                <User className="w-4 h-4" />
+                                                <span className="text-sm font-medium">My Profile</span>
+                                            </Link>
+                                            {/* Settings */}
+                                            <Link
+                                                to="/settings"
+                                                className="flex items-center space-x-3 py-3 hover:bg-zinc-700 text-gray-200 hover:text-white transition-all duration-200 rounded-xl px-2"
+                                            >
+                                                <Settings className="w-4 h-4" />
+                                                <span className="text-sm font-medium">Settings</span>
+                                            </Link>
+                                            {/* LMS */}
+                                            <a
+                                                href="/lms"
+                                                className="flex items-center border border-blue-500 rounded-2xl space-x-3 hover:bg-cyan-600 hover:text-black px-4 py-3 text-gray-200 transition-all duration-200 group mt-1"
+                                            >
+                                                <img src={LMSLogo} className="w-8 h-8 text-zinc-300 group-hover:text-lime-400 transition-colors" />
+                                                <span className="text-sm font-medium">LMS</span>
+                                            </a>
+                                        </div>
+                                        <div className="border-t border-white/10 my-4"></div>
+                                        <div className="px-6">
+                                            <button
+                                                onClick={() => {
+                                                    handleLogoutBtn();
+                                                    setIsMenuOpen(false);
+                                                }}
+                                                className="w-full text-left flex items-center hover:cursor-pointer space-x-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 group rounded-lg"
+                                            >
+                                                <LogOut className="w-4 h-4 group-hover:text-red-300 transition-colors" />
+                                                <span className="text-sm font-medium">Logout</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* If logged out: show Login and Sign Up */}
+                                {!username && !loading && (
+                                    <div className="flex flex-col gap-2 px-6 pt-4">
+                                        <button
+                                            onClick={() => window.location.href = '/login'}
+                                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 flex items-center justify-center space-x-2 hover:cursor-pointer"
+                                        >
+                                            Login
+                                        </button>
+                                        <button
+                                            onClick={() => window.location.href = '/accountType'}
+                                            className="border-2 text-[16px] hover:cursor-pointer border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105"
+                                        >
+                                            Sign Up
+                                        </button>
+                                    </div>
+                                )}
+
                             </div>
                         </div>
                     )}
@@ -776,6 +872,7 @@ const Navbar = () => {
                     </>
                 )}
             </header >
+            <ToastContainer />
         </>
     )
 }

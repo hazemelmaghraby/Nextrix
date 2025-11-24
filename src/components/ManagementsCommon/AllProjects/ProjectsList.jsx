@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../../../constants/firebase';
-import { getDoc, doc, setDoc, addDoc, collection, getDocs, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { getDoc, doc, setDoc, addDoc, collection, getDocs, deleteDoc, serverTimestamp, where, query, limit } from 'firebase/firestore';
 import useUserData from '../../../constants/data/useUserData';
 import MissingPermissions from '../../../constants/components/missingPermissions';
 import Loading from '../../../constants/components/Loading';
@@ -12,7 +12,7 @@ import { Link } from 'react-router';
 
 const ProjectsList = () => {
 
-    const lorem = ['Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolor deleniti veniam architecto, impedit, provident quidem qui repudiandae culpa voluptatem possimus illum quibusdam esse ad officiis officia nobis, dolores optio ullam.']
+    const lorem = ['Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolor deleniti veniam architecto, impedit, provident quidem qui repudiandae culpa voluptatem possimus illum quibusdam esse ad officiis officia nobis, dolores optio ullam.'];
 
     const { user, uid, owner, role, loading, firstName, surName } = useUserData();
     const [pendingProjects, setPendingProjects] = useState([]);
@@ -31,6 +31,55 @@ const ProjectsList = () => {
     const [expectedDuration, setExpectedDuration] = useState('');
     const [projectLeader, setProjectLeader] = useState('');
     const [team, setTeam] = useState('');
+
+    const [leaderResults, setLeaderResults] = useState([]);
+    const [selectedLeaderUID, setSelectedLeaderUID] = useState(null);
+    const [searchLoading, setSearchLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchLeaders = async () => {
+            if (projectLeader.trim().length < 2) {
+                setLeaderResults([]);
+                return;
+            }
+            setSearchLoading(true);
+            try {
+                const usersRef = collection(db, "users");
+                const snap = await getDocs(usersRef);
+                const allUsers = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+                // Filter users case-insensitively by username, firstName, surName, or email
+                const searchTerm = projectLeader.toLowerCase().trim();
+                const filteredUsers = allUsers.filter((user) => {
+                    const username = (user.username || "").toLowerCase();
+                    const firstName = (user.firstName || "").toLowerCase();
+                    const surName = (user.surName || user.sureName || "").toLowerCase();
+                    const email = (user.email || "").toLowerCase();
+                    const fullName = `${firstName} ${surName}`.trim();
+
+                    return (
+                        username.includes(searchTerm) ||
+                        firstName.includes(searchTerm) ||
+                        surName.includes(searchTerm) ||
+                        fullName.includes(searchTerm) ||
+                        email.includes(searchTerm)
+                    );
+                }).slice(0, 5); // Limit to 5 results
+
+                setLeaderResults(filteredUsers);
+            } catch (err) {
+                console.error("Search error:", err);
+                setLeaderResults([]);
+            } finally {
+                setSearchLoading(false);
+            }
+        };
+
+        const delay = setTimeout(fetchLeaders, 400);
+        return () => clearTimeout(delay);
+    }, [projectLeader]);
+
+
 
     useEffect(() => {
         // Only fetch if user exists and is owner or admin,
@@ -89,6 +138,7 @@ const ProjectsList = () => {
                 levelRequired,
                 expectedDuration,
                 projectLeader,
+                projectLeaderUID: selectedLeaderUID || null,
                 team,
                 status: "accepted",
                 acceptedAt: serverTimestamp(),
@@ -112,6 +162,11 @@ const ProjectsList = () => {
             setDiscountRate("");
             setCost("");
             setLevelRequired("");
+            setExpectedDuration("");
+            setProjectLeader("");
+            setTeam("");
+            setSelectedLeaderUID(null);
+            setLeaderResults([]);
 
         } catch (error) {
             console.error("Error accepting project:", error);
@@ -536,22 +591,67 @@ const ProjectsList = () => {
                 {acceptanceModalIsOpened && (
                     <>
                         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-                            <div className="bg-[#0a0a0f] border border-[#1f1f2e] rounded-2xl shadow-xl p-6 max-w-md w-full text-white">
+                            <div className="relative bg-[#0a0a0f] border border-[#1f1f2e] rounded-2xl shadow-xl p-6 max-w-md w-full text-white">
                                 <h2 className="text-lg font-semibold mb-4 text-white">Accept Project</h2>
                                 <form className="space-y-4" onSubmit={handleSubmition}>
-                                    <div>
-                                        <label className="block text-gray-300 font-medium mb-1" htmlFor="project-leader">Project Leader</label>
+                                    {/* Project Leader */}
+                                    <div className="relative">
+                                        <label
+                                            className="block text-gray-300 font-medium mb-1"
+                                            htmlFor="project-leader"
+                                        >
+                                            Project Leader
+                                        </label>
                                         <input
                                             id="project-leader"
                                             className="w-full rounded-lg border border-[#2b2b3c] bg-[#11111a] px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             type="text"
-                                            placeholder="Enter project leader name"
+                                            placeholder="Search username..."
                                             value={projectLeader}
                                             onChange={(e) => setProjectLeader(e.target.value)}
                                         />
+
+                                        {/* 🔍 Search Results Dropdown */}
+                                        {searchLoading && (
+                                            <p className="text-gray-400 text-sm mt-1">Searching...</p>
+                                        )}
+                                        {leaderResults.length > 0 && (
+                                            <div className="absolute mt-1 w-full bg-[#0d0d14] border border-[#2b2b3c] rounded-lg max-h-48 overflow-y-auto z-[60]">
+                                                {leaderResults.map((user) => (
+                                                    <div
+                                                        key={user.id}
+                                                        onClick={() => {
+                                                            setProjectLeader(user.username);
+                                                            setSelectedLeaderUID(user.id);
+                                                            setLeaderResults([]);
+                                                        }}
+                                                        className="px-3 py-2 hover:bg-blue-600/20 cursor-pointer flex items-center gap-3"
+                                                    >
+                                                        <img
+                                                            src={user.avatarURL || "/default-avatar.png"}
+                                                            alt={user.username}
+                                                            className="w-8 h-8 rounded-lg object-cover border border-[#2b2b3c]"
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium text-white">{user.username}</p>
+                                                            <p className="text-xs text-gray-400">
+                                                                {user.firstName} {user.surName}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
+
+                                    {/* Cost */}
                                     <div>
-                                        <label className="block text-gray-300 font-medium mb-1" htmlFor="cost">Cost</label>
+                                        <label
+                                            className="block text-gray-300 font-medium mb-1"
+                                            htmlFor="cost"
+                                        >
+                                            Cost
+                                        </label>
                                         <input
                                             id="cost"
                                             className="w-full rounded-lg border border-[#2b2b3c] bg-[#11111a] px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -562,8 +662,15 @@ const ProjectsList = () => {
                                             onChange={(e) => setCost(e.target.value)}
                                         />
                                     </div>
+
+                                    {/* Discount Rate */}
                                     <div>
-                                        <label className="block text-gray-300 font-medium mb-1" htmlFor="discount-rate">Discount Rate (%)</label>
+                                        <label
+                                            className="block text-gray-300 font-medium mb-1"
+                                            htmlFor="discount-rate"
+                                        >
+                                            Discount Rate (%)
+                                        </label>
                                         <input
                                             id="discount-rate"
                                             className="w-full rounded-lg border border-[#2b2b3c] bg-[#11111a] px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -575,8 +682,15 @@ const ProjectsList = () => {
                                             onChange={(e) => setDiscountRate(e.target.value)}
                                         />
                                     </div>
+
+                                    {/* Expected Duration */}
                                     <div>
-                                        <label className="block text-gray-300 font-medium mb-1" htmlFor="expected-duration">Expected Duration (days)</label>
+                                        <label
+                                            className="block text-gray-300 font-medium mb-1"
+                                            htmlFor="expected-duration"
+                                        >
+                                            Expected Duration (days)
+                                        </label>
                                         <input
                                             id="expected-duration"
                                             className="w-full rounded-lg border border-[#2b2b3c] bg-[#11111a] px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -587,11 +701,24 @@ const ProjectsList = () => {
                                             onChange={(e) => setExpectedDuration(e.target.value)}
                                         />
                                     </div>
+
+                                    {/* Buttons */}
                                     <div className="flex justify-end gap-3 mt-6">
                                         <button
                                             type="button"
                                             className="px-4 py-2 bg-[#1a1a28] hover:bg-[#222233] text-gray-200 rounded-lg font-semibold border border-[#2b2b3c]"
-                                            onClick={() => setAcceptanceModalIsOpened(false)}
+                                            onClick={() => {
+                                                setAcceptanceModalIsOpened(false);
+                                                setSelectedProject(null);
+                                                setDiscountRate("");
+                                                setCost("");
+                                                setLevelRequired("");
+                                                setExpectedDuration("");
+                                                setProjectLeader("");
+                                                setTeam("");
+                                                setSelectedLeaderUID(null);
+                                                setLeaderResults([]);
+                                            }}
                                         >
                                             Cancel
                                         </button>
@@ -607,6 +734,7 @@ const ProjectsList = () => {
                         </div>
                     </>
                 )}
+
                 {rejectionModalIsOpened && (
                     <>
                         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
