@@ -74,7 +74,7 @@ const Contact = () => {
         {
             icon: Mail,
             title: "Email",
-            value: "hello@nextrix.com",
+            value: "nextrixcomp@gmail.com",
             gradient: "from-orange-500 to-red-500"
         },
         {
@@ -86,7 +86,7 @@ const Contact = () => {
         {
             icon: MapPin,
             title: "Location",
-            value: "San Francisco, CA",
+            value: "Cairo, Egypt",
             gradient: "from-orange-500 to-yellow-500"
         }
     ];

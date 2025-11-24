@@ -56,8 +56,8 @@ const Services = () => {
         },
         {
             icon: Globe,
-            title: "E-Commerce Specialists",
-            description: "We have experts in building scalable online stores with secure payment processing",
+            title: "Networking Specialists",
+            description: "We have professionals skilled in designing, implementing, and securing high-performance networks for modern businesses",
             gradient: "from-orange-500 to-yellow-500"
         },
         {
@@ -114,7 +114,9 @@ const Services = () => {
                                         {service.description}
                                     </p>
                                     <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <button className="text-orange-500 font-semibold hover:text-orange-400 transition-colors duration-300">
+                                        <button onClick={() => {
+                                            window.location.href = '/accs'
+                                        }} className="text-orange-500 font-semibold hover:cursor-pointer hover:text-orange-400 transition-colors duration-300">
                                             Learn More →
                                         </button>
                                     </div>
