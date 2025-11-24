@@ -44,38 +44,38 @@ const Services = () => {
     const services = [
         {
             icon: Code,
-            title: "Web Development",
-            description: "Modern, responsive websites built with the latest technologies and best practices.",
+            title: "Web Developers",
+            description: "We have experienced developers in all programming fields",
             gradient: "from-orange-500 to-red-500"
         },
         {
             icon: Smartphone,
-            title: "Mobile Apps",
-            description: "Native and cross-platform mobile applications for iOS and Android.",
+            title: "Mobile App Developers",
+            description: "We have specialists in native and cross-platform mobile development for iOS and Android",
             gradient: "from-blue-500 to-cyan-500"
         },
         {
             icon: Globe,
-            title: "E-Commerce",
-            description: "Scalable online stores with secure payment processing and inventory management.",
+            title: "E-Commerce Specialists",
+            description: "We have experts in building scalable online stores with secure payment processing",
             gradient: "from-orange-500 to-yellow-500"
         },
         {
             icon: Zap,
-            title: "Performance Optimization",
-            description: "Lightning-fast loading times and optimal user experience across all devices.",
+            title: "Performance Optimization Specialists",
+            description: "We have specialists focused on lightning-fast loading times and optimal user experience",
             gradient: "from-blue-500 to-purple-500"
         },
         {
             icon: Database,
-            title: "Backend Development",
-            description: "Robust server-side solutions with scalable databases and APIs.",
+            title: "Backend Development Specialists",
+            description: "We have experienced developers in robust server-side solutions and scalable databases",
             gradient: "from-orange-500 to-pink-500"
         },
         {
             icon: Shield,
-            title: "Security Solutions",
-            description: "Comprehensive security implementation to protect your digital assets.",
+            title: "Security Specialists",
+            description: "We have experts in comprehensive security implementation to protect digital assets",
             gradient: "from-blue-500 to-indigo-500"
         }
     ];
