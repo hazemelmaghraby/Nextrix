@@ -41,10 +41,13 @@ import LMSHome from './components/LMS/Home/LMSHome';
 import LMSLayout from './components/LMS/Layout/LMSLayout';
 import Checkout from './components/Marketplace/Checkout/Checkout';
 import ProjectsDefaultPlate from './components/Projects/ProjectsDefaultPlate';
+import Maintenance from './constants/components/Maintenance';
 // import AccountSettingsDemo from './components/Settings/demo';
 
 gsap.registerPlugin(ScrollTrigger);
 
+
+const MAINTENANCE_MODE = true; // 🔥 toggle this
 
 
 const Layout = () => {
@@ -76,7 +79,9 @@ const Layout = () => {
 
 function App() {
 
-
+  if (MAINTENANCE_MODE) {
+    return <Maintenance />;
+  }
 
   const router = createBrowserRouter(createRoutesFromElements(
     <Route>
