@@ -62,9 +62,8 @@ const Maintenance = () => {
                 </p>
 
                 <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6 text-lg text-gray-200">
-                    ⏳ Expected downtime:{" "}
                     <span className="text-orange-400 font-semibold">
-                        1/5/2026
+                        Returning Soon...
                     </span>
                 </div>
 
